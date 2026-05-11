@@ -1,0 +1,1695 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GenesIA — Onde a inteligência artificial ganha vida</title>
+<meta name="description" content="A GenesIA cria agentes de IA e automações 100% personalizados, treinados com a identidade e os processos da sua empresa. Do briefing ao deploy em dias.">
+<meta property="og:title" content="GenesIA — Onde a inteligência artificial ganha vida">
+<meta property="og:description" content="A GenesIA cria agentes de IA e automações 100% personalizados, treinados com a identidade e os processos da sua empresa.">
+<meta property="og:type" content="website">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg: #060606;
+    --bg-2: #0d0d0d;
+    --fg: #f5f3ee;
+    --muted: #7a7a78;
+    --accent: #00e6ff;
+    --accent-2: #9ca5ff;
+    --accent-3: #d8ff3e;
+    --neon-green: #39ffb4;
+    --line: rgba(245,243,238,0.08);
+    --grid: rgba(245,243,238,0.04);
+    --easing: cubic-bezier(0.77, 0, 0.175, 1);
+  }
+  *{ margin:0; padding:0; box-sizing:border-box; }
+  html,body{ background:var(--bg); color:var(--fg); font-family:'Inter',sans-serif; -webkit-font-smoothing:antialiased; overflow-x:hidden; }
+  body{ cursor:none; }
+  ::selection{ background:var(--accent); color:#000; }
+  a{ color:inherit; text-decoration:none; }
+  img,canvas{ display:block; max-width:100%; }
+
+  /* ===== Cursor ===== */
+  .cursor-outer, .cursor-inner{
+    position:fixed; top:0; left:0; pointer-events:none;
+    border-radius:50%; mix-blend-mode:difference;
+    z-index:9999; transform: translate(-50%, -50%);
+    will-change: transform, width, height;
+  }
+  .cursor-outer{ width:42px; height:42px; border:1px solid #fff;
+    transition: width .35s var(--easing), height .35s var(--easing), background .35s var(--easing); }
+  .cursor-inner{ width:6px; height:6px; background:#fff; }
+  .cursor-outer.hover{ width:80px; height:80px; background:#fff; }
+  .cursor-inner.hover{ opacity:0; }
+  @media (max-width: 720px){ body{ cursor:auto; } .cursor-outer, .cursor-inner{ display:none; } }
+
+  /* ===== Loader ===== */
+  #loader{
+    position:fixed; inset:0; background:var(--bg); z-index:10000;
+    display:flex; align-items:flex-end; justify-content:space-between;
+    padding:32px 32px 24px; transition: transform 1.2s var(--easing) .4s;
+    font-family:'Space Grotesk', sans-serif;
+  }
+  #loader.done{ transform: translateY(-101%); }
+  #loader .l-mark{ font-size:14px; letter-spacing:.18em; text-transform:uppercase; }
+  #loader .l-pct{ font-size:14px; letter-spacing:.18em; }
+  #loader .l-bar{ position:absolute; left:0; bottom:0; height:1px; background:var(--accent); width:0%; transition: width .15s linear; box-shadow: 0 0 14px var(--accent); }
+
+  /* ===== Header ===== */
+  header{
+    position:fixed; top:0; left:0; right:0; z-index:80;
+    display:flex; justify-content:space-between; align-items:center;
+    padding:22px 32px; mix-blend-mode: difference; color:#fff;
+    transition: transform 0.55s var(--easing);
+  }
+  header.header-hidden{ transform: translateY(-120%); }
+  .logo{ font-family:'Space Grotesk', sans-serif; font-weight:600; letter-spacing:.04em; font-size:18px; display:flex; align-items:center; gap:10px; }
+  .logo .dot{ width:9px; height:9px; background:var(--accent); border-radius:50%; box-shadow: 0 0 18px var(--accent); animation: pulse 2.4s ease-in-out infinite; }
+  .logo b{ font-weight:600; }
+  .logo .ia{ color:var(--accent); }
+  @keyframes pulse{ 0%,100%{transform:scale(1);} 50%{transform:scale(1.4);} }
+  nav ul{ list-style:none; display:flex; gap:36px; }
+  nav a{ font-family:'Space Grotesk', sans-serif; font-size:13px; letter-spacing:.16em; text-transform:uppercase; position:relative; padding:6px 0; }
+  nav a::after{ content:''; position:absolute; left:0; bottom:0; width:0; height:1px; background:#fff; transition: width .5s var(--easing); }
+  nav a:hover::after{ width:100%; }
+  .header-cta{ font-family:'Space Grotesk', sans-serif; font-size:13px; letter-spacing:.16em; text-transform:uppercase; border:1px solid #fff; padding:10px 18px; border-radius:999px; transition: background .4s var(--easing), color .4s var(--easing); }
+  .header-cta:hover{ background:#fff; color:#000; }
+  @media (max-width: 860px){ nav{ display:none; } }
+
+  /* ===== Hero ===== */
+  .hero{ position:relative; height:100vh; min-height:720px; width:100%; overflow:hidden; display:flex; flex-direction:column; justify-content:flex-end; padding:120px 32px 56px; }
+  #webgl{ position:absolute; inset:0; z-index:0; }
+  .hero::before{
+    content:''; position:absolute; inset:0; z-index:1;
+    background:
+      radial-gradient(circle at 70% 40%, transparent 0%, var(--bg) 80%),
+      linear-gradient(180deg, transparent 60%, var(--bg) 100%);
+    pointer-events:none;
+  }
+  .hero-grid{
+    position:absolute; inset:0; z-index:1; pointer-events:none;
+    background-image:
+      linear-gradient(var(--grid) 1px, transparent 1px),
+      linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+    background-size: 80px 80px;
+    mask-image: radial-gradient(circle at 50% 50%, black 30%, transparent 75%);
+  }
+  .hero-content{ position:relative; z-index:2; }
+  .eyebrow{ display:flex; align-items:center; gap:14px; font-family:'Space Grotesk', sans-serif; font-size:13px; letter-spacing:.22em; text-transform:uppercase; color:var(--muted); margin-bottom:28px; }
+  .eyebrow .line{ width:50px; height:1px; background:var(--muted); }
+  h1.display{ font-family:'Space Grotesk', sans-serif; font-weight:500; font-size: clamp(34px, 5.8vw, 100px); line-height: 1; letter-spacing: -.03em; text-transform:none; }
+  h1.display .row{ overflow:hidden; }
+  h1.display .row span{ display:inline-block; transform: translateY(102%); animation: rise 1.2s var(--easing) forwards; }
+  h1.display .row:nth-child(2) span{ animation-delay:.12s; }
+  h1.display .row:nth-child(3) span{ animation-delay:.24s; }
+  h1.display em{ font-style:italic; font-weight:300; color:var(--accent); font-family:'Inter', serif; letter-spacing:-.02em; }
+  h1.display .brand{ font-weight:600; }
+  h1.display .brand .ia{ color: var(--accent); font-style:normal; font-weight:600; text-shadow: 0 0 28px rgba(0,230,255,.45); }
+  @keyframes rise{ to{ transform: translateY(0%); } }
+  .hero-meta{ margin-top:48px; display:flex; justify-content:space-between; align-items:flex-end; gap:32px; font-family:'Space Grotesk', sans-serif; font-size:13px; letter-spacing:.18em; text-transform:uppercase; color:var(--muted); }
+  .hero-meta p{ max-width:520px; line-height:1.7; text-transform:none; letter-spacing:.02em; font-family:'Inter',sans-serif; font-size:15px; color:#cfcdc6; }
+  .hero-meta .scroll{ display:flex; align-items:center; gap:12px; }
+  .hero-meta .scroll .arrow{ width:1px; height:36px; background:var(--fg); position:relative; animation: scroll-pulse 2.4s ease-in-out infinite; }
+  @keyframes scroll-pulse{ 0%,100%{ transform: scaleY(.4); transform-origin:top; } 50%{ transform: scaleY(1); transform-origin:top; } }
+
+  /* ===== Marquee ===== */
+  .marquee{ border-top:1px solid var(--line); border-bottom:1px solid var(--line); padding:24px 0; overflow:hidden; white-space:nowrap; background:var(--bg); }
+  .marquee-track{ display:inline-flex; gap:60px; animation: marquee 38s linear infinite; font-family:'Space Grotesk', sans-serif; font-size: clamp(20px, 3vw, 36px); letter-spacing:-.01em; text-transform:uppercase; font-weight:400; }
+  .marquee-track .star{ color:var(--accent); }
+  .marquee-track .item{ display:inline-flex; align-items:center; gap:60px; }
+  @keyframes marquee{ from{ transform: translateX(0); } to{ transform: translateX(-50%); } }
+
+  /* ===== Section base ===== */
+  section{ position:relative; }
+  .container{ padding: 0 32px; }
+  .section-label{ display:flex; gap:14px; align-items:center; font-family:'Space Grotesk', sans-serif; font-size:12px; letter-spacing:.22em; text-transform:uppercase; color:var(--muted); margin-bottom:48px; }
+  .section-label .num{ color:var(--accent); font-variant-numeric: tabular-nums; }
+  .section-label .line{ flex:1; height:1px; background:var(--line); }
+
+  /* ===== About ===== */
+  .about{ padding: 140px 0 120px; }
+  .about-grid{ display:grid; grid-template-columns: 1fr 1fr; gap:80px; }
+  .about h2{ font-family:'Space Grotesk', sans-serif; font-weight:400; font-size: clamp(36px, 5.4vw, 78px); line-height: 1.05; letter-spacing:-.02em; }
+  .about h2 em{ color:var(--accent); font-style:italic; font-weight:300; font-family:'Inter', serif; }
+  .about p{ font-size:17px; line-height:1.7; color:#cfcdc6; margin-bottom:24px; }
+  .about .stats{ display:grid; grid-template-columns: repeat(3, 1fr); gap:24px; margin-top:40px; padding-top:40px; border-top:1px solid var(--line); }
+  .stat .num{ font-family:'Space Grotesk', sans-serif; font-size: clamp(34px, 4vw, 56px); font-weight:500; letter-spacing:-.02em; line-height:1; }
+  .stat .num em{ color:var(--accent); font-style:normal; }
+  .stat .lbl{ margin-top:10px; font-size:12px; letter-spacing:.18em; text-transform:uppercase; color:var(--muted); }
+  @media (max-width: 860px){ .about-grid{ grid-template-columns: 1fr; gap:40px; } }
+
+  /* ===== Comparison ===== */
+  .compare{ padding: 80px 0 120px; }
+  .compare-head{ margin-bottom: 72px; }
+  .compare-head h2{ font-family:'Space Grotesk',sans-serif; font-weight:400; font-size: clamp(36px,5vw,72px); line-height:1; letter-spacing:-.02em; max-width:900px; }
+  .compare-head h2 em{ color:var(--accent); font-style:italic; font-weight:300; font-family:'Inter',serif; }
+  .compare-grid{ display:grid; grid-template-columns: repeat(3,1fr); gap:24px; }
+  .compare-card{ border:1px solid var(--line); border-radius:14px; padding:36px 32px; background: linear-gradient(180deg, rgba(255,255,255,0.02), transparent); transition: all .5s var(--easing); position:relative; overflow:hidden; }
+  .compare-card:hover{ border-color: rgba(0,230,255,0.35); transform: translateY(-6px); }
+  .compare-card .row-x, .compare-card .row-v{ display:flex; align-items:flex-start; gap:14px; padding: 16px 0; }
+  .compare-card .row-x{ color:var(--muted); }
+  .compare-card .row-x svg{ stroke:#ff6478; flex-shrink:0; }
+  .compare-card .row-v svg{ stroke:var(--accent); flex-shrink:0; }
+  .compare-card .row-v{ color:var(--fg); font-weight:500; }
+  .compare-card hr{ border:none; height:1px; background: linear-gradient(90deg, transparent, var(--accent), transparent); opacity:.5; margin: 8px 0; }
+
+  /* ===== Process ===== */
+  .process{ padding: 100px 0 120px; border-top:1px solid var(--line); }
+  .process-head h2{ font-family:'Space Grotesk',sans-serif; font-weight:400; font-size: clamp(36px,5vw,72px); line-height:1; letter-spacing:-.02em; margin-bottom:60px; max-width:900px; }
+  .process-head h2 em{ color:var(--accent); font-style:italic; font-weight:300; font-family:'Inter',serif; }
+  .steps{ display:grid; grid-template-columns: repeat(4,1fr); gap:24px; }
+  .step{ position:relative; padding-top:32px; }
+  .step .stepnum{ font-family:'Space Grotesk',sans-serif; font-size:80px; line-height:1; font-weight:500; color: rgba(0,230,255,0.12); letter-spacing:-.04em; }
+  .step .ico{ width:52px; height:52px; border-radius:14px; background: rgba(0,230,255,0.08); border:1px solid rgba(0,230,255,0.25); display:flex; align-items:center; justify-content:center; margin: 14px 0 18px; color: var(--accent); }
+  .step h3{ font-family:'Space Grotesk',sans-serif; font-weight:500; font-size:20px; letter-spacing:-.01em; margin-bottom:10px; }
+  .step p{ font-size:14px; color: var(--muted); line-height:1.6; }
+  @media (max-width: 860px){ .steps{ grid-template-columns: repeat(2,1fr); } }
+
+  /* ===== Work / Casos de uso ===== */
+  .work{ padding: 100px 0 140px; border-top:1px solid var(--line); }
+  .work-head{ display:flex; justify-content:space-between; align-items:flex-end; margin-bottom: 64px; }
+  .work-head h2{ font-family:'Space Grotesk', sans-serif; font-weight:400; font-size: clamp(36px, 5vw, 72px); line-height:1; letter-spacing:-.02em; }
+  .work-head h2 em{ color:var(--accent); font-style:italic; font-weight:300; font-family:'Inter',serif; }
+  .work-head .filters{ display:flex; gap:12px; flex-wrap:wrap; }
+  .filter{ font-family:'Space Grotesk', sans-serif; font-size:12px; letter-spacing:.16em; text-transform:uppercase; padding:8px 16px; border:1px solid var(--line); border-radius:999px; color:var(--muted); transition: all .35s var(--easing); cursor:none; }
+  .filter.active, .filter:hover{ color:#000; background:var(--accent); border-color:var(--accent); }
+  .grid{ display:grid; grid-template-columns: repeat(12, 1fr); gap:24px; }
+  .tile{ grid-column: span 6; position:relative; overflow:hidden; border-radius:14px; aspect-ratio: 16/10; background:#111; isolation:isolate; cursor:none; }
+  .tile.tall{ aspect-ratio: 4/5; }
+  .tile.wide{ grid-column: span 12; aspect-ratio: 21/9; }
+  .tile.third{ grid-column: span 4; aspect-ratio: 4/5; }
+  .tile .gfx{ position:absolute; inset:0; transition: transform 1.2s var(--easing); background-size:cover; background-position:center; }
+  .tile:hover .gfx{ transform: scale(1.06); }
+  .tile .veil{ position:absolute; inset:0; background: linear-gradient(180deg, rgba(0,0,0,0) 40%, rgba(0,0,0,0.85) 100%); pointer-events:none; }
+  .tile .meta{ position:absolute; left:0; right:0; bottom:0; padding: 26px 28px; display:flex; justify-content:space-between; align-items:flex-end; z-index:2; }
+  .tile .meta .title{ font-family:'Space Grotesk', sans-serif; font-weight:500; font-size:24px; letter-spacing:-.01em; }
+  .tile .meta .sub{ font-size:12px; letter-spacing:.16em; text-transform:uppercase; color:#cfcdc6; margin-top:6px; }
+  .tile .meta .year{ font-family:'Space Grotesk', sans-serif; font-size:13px; letter-spacing:.16em; color:#cfcdc6; }
+  .tile .tag{ position:absolute; top:20px; left:20px; font-family:'Space Grotesk', sans-serif; font-size:11px; letter-spacing:.18em; text-transform:uppercase; background:rgba(0,0,0,.4); backdrop-filter: blur(8px); border:1px solid rgba(255,255,255,.2); padding:6px 12px; border-radius:999px; z-index:2; }
+  .tile .number{ position:absolute; top:20px; right:24px; font-family:'Space Grotesk', sans-serif; font-size:12px; letter-spacing:.16em; color:rgba(255,255,255,.65); z-index:2; }
+  .gfx-1{ background: radial-gradient(circle at 30% 30%, #00e6ff 0%, transparent 55%), radial-gradient(circle at 80% 70%, #9ca5ff 0%, transparent 60%), linear-gradient(135deg, #051624, #060606); }
+  .gfx-2{ background: radial-gradient(circle at 70% 30%, #4dffe4 0%, transparent 55%), radial-gradient(circle at 20% 80%, #00a8ff 0%, transparent 60%), linear-gradient(135deg, #051a22, #060606); }
+  .gfx-3{ background: radial-gradient(circle at 50% 50%, #00e6ff 0%, transparent 55%), radial-gradient(circle at 90% 90%, #d8ff3e 0%, transparent 70%), linear-gradient(135deg, #06121f, #060606); }
+  .tile .illu{ position:absolute; inset:0; z-index:1; pointer-events:none; transition: transform 1.2s var(--easing); overflow:hidden; }
+  .tile:hover .illu{ transform: scale(1.05); }
+  .tile .illu img{ width:100%; height:100%; object-fit:cover; display:block; mix-blend-mode: screen; opacity:.95; filter: saturate(1.05) contrast(1.05); }
+  .tile.has-img .veil{ background: linear-gradient(180deg, rgba(0,0,0,0) 28%, rgba(0,0,0,0.92) 100%); }
+  @media (max-width: 860px){
+    .grid{ grid-template-columns: repeat(2, 1fr); }
+    .tile, .tile.tall, .tile.third{ grid-column: span 2; aspect-ratio: 16/11; }
+    .tile.wide{ grid-column: span 2; }
+    .work-head{ flex-direction:column; align-items:flex-start; gap:24px; }
+  }
+
+  /* ===== Capabilities ===== */
+  .cap{ padding: 100px 0 100px; border-top:1px solid var(--line); }
+  .cap h2{ font-family:'Space Grotesk', sans-serif; font-weight:400; font-size: clamp(40px, 6vw, 96px); line-height:1; letter-spacing:-.02em; margin-bottom: 60px; }
+  .cap h2 em{ color:var(--accent); font-style:italic; font-weight:300; font-family:'Inter',serif; }
+  .cap-list{ list-style:none; }
+  .cap-row{ display:grid; grid-template-columns: 80px 1.4fr 1.6fr 120px; gap:32px; align-items:center; padding: 28px 0; border-top:1px solid var(--line); transition: padding .5s var(--easing); position:relative; }
+  .cap-row:last-child{ border-bottom:1px solid var(--line); }
+  .cap-row .num{ font-family:'Space Grotesk', sans-serif; font-size:13px; letter-spacing:.18em; color:var(--muted); }
+  .cap-row .name{ font-family:'Space Grotesk', sans-serif; font-size: clamp(22px, 2.2vw, 36px); font-weight:400; letter-spacing:-.01em; transition: transform .6s var(--easing), color .6s var(--easing); }
+  .cap-row .desc{ font-size:14px; color:var(--muted); line-height:1.6; }
+  .cap-row .arrow{ justify-self:end; width:48px; height:48px; border-radius:50%; border:1px solid var(--line); display:flex; align-items:center; justify-content:center; transition: all .5s var(--easing); }
+  .cap-row:hover{ padding: 36px 0; }
+  .cap-row:hover .name{ transform: translateX(12px); color:var(--accent); }
+  .cap-row:hover .arrow{ background:var(--accent); border-color:var(--accent); color:#000; transform: rotate(45deg); }
+  @media (max-width: 860px){ .cap-row{ grid-template-columns: 40px 1fr 60px; } .cap-row .desc{ display:none; } }
+
+  /* ===== Quote ===== */
+  .quote{ padding: 140px 0; border-top:1px solid var(--line); text-align:center; }
+  .quote blockquote{ max-width: 1100px; margin: 0 auto; font-family:'Space Grotesk', sans-serif; font-weight:300; font-size: clamp(28px, 4vw, 64px); line-height:1.15; letter-spacing:-.02em; padding: 0 32px; }
+  .quote blockquote em{ color:var(--accent); font-style:italic; font-family:'Inter',serif; font-weight:300; }
+  .quote .who{ margin-top:48px; font-family:'Space Grotesk', sans-serif; font-size:12px; letter-spacing:.22em; text-transform:uppercase; color:var(--muted); }
+
+  /* ===== Contact / CTA ===== */
+  .cta{ padding: 120px 32px 60px; border-top:1px solid var(--line); position:relative; overflow:hidden; }
+  .cta-big{ font-family:'Space Grotesk', sans-serif; font-weight:400; font-size: clamp(48px, 12vw, 200px); line-height:.9; letter-spacing:-.04em; text-transform:uppercase; }
+  .cta-big em{ color:var(--accent); font-style:italic; font-weight:300; font-family:'Inter',serif; }
+  .cta-big a{ display:inline-block; position:relative; transition: color .4s var(--easing); }
+  .cta-big a:hover{ color:var(--accent); }
+  .cta-big .ar{ display:inline-block; transform: translateY(-8%); margin-left:24px; transition: transform .5s var(--easing); }
+  .cta-big a:hover .ar{ transform: translate(20px, -8%) rotate(-12deg); }
+  .cta-row{ margin-top:80px; display:grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap:32px; padding-top:40px; border-top:1px solid var(--line); }
+  .cta-col h4{ font-family:'Space Grotesk', sans-serif; font-size:11px; letter-spacing:.22em; text-transform:uppercase; color:var(--muted); margin-bottom:18px; }
+  .cta-col a, .cta-col p{ display:block; font-size:15px; line-height:1.8; color:#cfcdc6; }
+  .cta-col a:hover{ color:var(--accent); }
+
+  /* ===== Form ===== */
+  .form-wrap{ margin-top: 80px; padding-top: 60px; border-top: 1px solid var(--line); display:grid; grid-template-columns: 1fr 1fr; gap: 80px; }
+  .form-wrap h3{ font-family:'Space Grotesk',sans-serif; font-weight:400; font-size: clamp(28px, 3.4vw, 48px); line-height:1.05; letter-spacing:-.02em; margin-bottom:18px; }
+  .form-wrap h3 em{ color:var(--accent); font-style:italic; font-weight:300; font-family:'Inter',serif; }
+  .form-wrap p{ color:#cfcdc6; line-height:1.7; }
+  form .field{ margin-bottom: 20px; }
+  form label{ font-family:'Space Grotesk',sans-serif; font-size:11px; letter-spacing:.2em; text-transform:uppercase; color:var(--muted); display:block; margin-bottom:8px; }
+  form input, form textarea{ width:100%; background: transparent; border: none; border-bottom:1px solid var(--line); padding: 12px 0; color: var(--fg); font-family:'Inter',sans-serif; font-size:16px; outline:none; transition: border-color .4s var(--easing); }
+  form input:focus, form textarea:focus{ border-color: var(--accent); }
+  form textarea{ resize:vertical; min-height: 100px; }
+  form button{ margin-top: 12px; background: var(--accent); color:#000; border:none; padding: 16px 28px; border-radius:999px; font-family:'Space Grotesk',sans-serif; font-size:13px; letter-spacing:.18em; text-transform:uppercase; font-weight:600; cursor:none; transition: all .4s var(--easing); }
+  form button:hover{ background:#fff; box-shadow: 0 0 32px rgba(0,230,255,0.5); }
+  footer{ padding: 24px 32px 32px; display:flex; justify-content:space-between; align-items:center; font-family:'Space Grotesk', sans-serif; font-size:11px; letter-spacing:.18em; text-transform:uppercase; color:var(--muted); border-top:1px solid var(--line); }
+  footer .links{ display:flex; gap:24px; }
+  @media (max-width: 860px){
+    .compare-grid, .steps{ grid-template-columns: 1fr; }
+    .cta-row, .form-wrap{ grid-template-columns: 1fr 1fr; gap: 32px; }
+    footer{ flex-direction:column; gap:12px; align-items:flex-start; }
+  }
+  @media (max-width: 540px){
+    .cta-row{ grid-template-columns: 1fr 1fr; }
+    .form-wrap{ grid-template-columns: 1fr; }
+  }
+
+  /* ===== Reveal animation ===== */
+  .reveal{ opacity:0; transform: translateY(40px); transition: opacity 1s var(--easing), transform 1s var(--easing); }
+  .reveal.in{ opacity:1; transform:none; }
+
+  /* =========================================================
+     GLASSMORPHISM CARDS — Interactive Dark Premium
+     ========================================================= */
+
+  /* Base glass tile */
+  .glass-tile {
+    grid-column: span 4;
+    position: relative;
+    border-radius: 20px;
+    aspect-ratio: 4/5;
+    background: rgba(8, 16, 32, 0.45);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.10);
+    overflow: hidden;
+    cursor: none;
+    transform-style: preserve-3d;
+    transition: border-color 0.6s ease, box-shadow 0.6s ease;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    isolation: isolate;
+  }
+
+  .glass-tile:hover {
+    border-color: rgba(0, 230, 255, 0.22);
+    box-shadow:
+      0 0 0 1px rgba(0, 230, 255, 0.04),
+      0 24px 70px rgba(0, 0, 0, 0.55),
+      inset 0 1px 0 rgba(255, 255, 255, 0.12);
+  }
+
+  /* Top glass reflex line */
+  .glass-tile::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent 8%, rgba(255,255,255,0.22) 50%, transparent 92%);
+    z-index: 6;
+    pointer-events: none;
+  }
+
+  /* Mouse-following radial glow */
+  .glass-glow {
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(
+      circle at var(--mx, 50%) var(--my, 50%),
+      var(--glow-col, rgba(0,230,255,0.22)) 0%,
+      transparent 58%
+    );
+    opacity: 0;
+    transition: opacity 0.5s ease;
+    pointer-events: none;
+    z-index: 1;
+  }
+  .glass-tile:hover .glass-glow { opacity: 1; }
+
+  /* Decorative SVG background illustration */
+  .glass-deco {
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    pointer-events: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 60px 24px 120px;
+    opacity: 0.55;
+    transition: opacity 0.6s ease, transform 0.6s ease;
+  }
+  .glass-tile:hover .glass-deco {
+    opacity: 0.80;
+    transform: scale(1.04) translateY(-4px);
+  }
+  .glass-deco svg { width: 100%; height: 100%; }
+
+  /* Gradient veil at bottom */
+  .glass-veil {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, transparent 38%, rgba(4, 8, 18, 0.88) 100%);
+    pointer-events: none;
+    z-index: 3;
+  }
+
+  /* Icon box — floating above meta text */
+  .glass-icon {
+    position: absolute;
+    bottom: 110px;
+    left: 28px;
+    width: 52px;
+    height: 52px;
+    border-radius: 15px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 5;
+    transition: transform 0.5s var(--easing), box-shadow 0.5s var(--easing);
+  }
+  .glass-tile:hover .glass-icon {
+    transform: translateY(-4px);
+  }
+
+  /* Tag & number (reuse shared styles but ensure z-index) */
+  .glass-tile .tag { z-index: 5; }
+  .glass-tile .number { z-index: 5; }
+
+  /* Meta section at card bottom */
+  .glass-meta {
+    position: relative;
+    z-index: 4;
+    padding: 20px 28px 26px;
+  }
+  .glass-meta .title {
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 500;
+    font-size: 22px;
+    letter-spacing: -0.01em;
+    line-height: 1.2;
+  }
+  .glass-meta .sub {
+    font-size: 11px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: rgba(207, 205, 198, 0.75);
+    margin-top: 7px;
+  }
+  .glass-meta .year {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 12px;
+    letter-spacing: 0.14em;
+    color: rgba(255,255,255,0.35);
+    margin-top: 10px;
+  }
+
+  /* ── Card: RH Interno ── */
+  .glass-tile-rh {
+    background: linear-gradient(145deg, rgba(0, 35, 55, 0.5) 0%, rgba(0, 8, 18, 0.65) 100%);
+    --glow-col: rgba(57, 255, 180, 0.20);
+  }
+  .glass-tile-rh:hover {
+    border-color: rgba(57, 255, 180, 0.24);
+    box-shadow:
+      0 0 0 1px rgba(57, 255, 180, 0.05),
+      0 24px 70px rgba(0, 0, 0, 0.55),
+      0 0 80px rgba(57, 255, 180, 0.07),
+      inset 0 1px 0 rgba(57, 255, 180, 0.15);
+  }
+  .glass-tile-rh .glass-icon {
+    background: rgba(57, 255, 180, 0.10);
+    border: 1px solid rgba(57, 255, 180, 0.28);
+    color: var(--neon-green);
+    box-shadow: 0 0 18px rgba(57, 255, 180, 0.12);
+  }
+  .glass-tile-rh:hover .glass-icon {
+    box-shadow: 0 0 28px rgba(57, 255, 180, 0.35);
+  }
+
+  /* ── Card: Insights Diários ── */
+  .glass-tile-insights {
+    background: linear-gradient(145deg, rgba(0, 20, 55, 0.5) 0%, rgba(0, 8, 22, 0.65) 100%);
+    --glow-col: rgba(0, 230, 255, 0.20);
+  }
+  .glass-tile-insights:hover {
+    border-color: rgba(0, 230, 255, 0.28);
+    box-shadow:
+      0 0 0 1px rgba(0, 230, 255, 0.05),
+      0 24px 70px rgba(0, 0, 0, 0.55),
+      0 0 80px rgba(0, 230, 255, 0.07),
+      inset 0 1px 0 rgba(0, 230, 255, 0.14);
+  }
+  .glass-tile-insights .glass-icon {
+    background: rgba(0, 230, 255, 0.08);
+    border: 1px solid rgba(0, 230, 255, 0.26);
+    color: var(--accent);
+    box-shadow: 0 0 18px rgba(0, 230, 255, 0.12);
+  }
+  .glass-tile-insights:hover .glass-icon {
+    box-shadow: 0 0 28px rgba(0, 230, 255, 0.38);
+  }
+
+  /* ── Card: Automação ── */
+  .glass-tile-auto {
+    background: linear-gradient(145deg, rgba(14, 10, 55, 0.5) 0%, rgba(6, 4, 20, 0.65) 100%);
+    --glow-col: rgba(156, 165, 255, 0.22);
+  }
+  .glass-tile-auto:hover {
+    border-color: rgba(156, 165, 255, 0.26);
+    box-shadow:
+      0 0 0 1px rgba(156, 165, 255, 0.05),
+      0 24px 70px rgba(0, 0, 0, 0.55),
+      0 0 80px rgba(156, 165, 255, 0.08),
+      inset 0 1px 0 rgba(156, 165, 255, 0.14);
+  }
+  .glass-tile-auto .glass-icon {
+    background: rgba(156, 165, 255, 0.08);
+    border: 1px solid rgba(156, 165, 255, 0.26);
+    color: var(--accent-2);
+    box-shadow: 0 0 18px rgba(156, 165, 255, 0.12);
+  }
+  .glass-tile-auto:hover .glass-icon {
+    box-shadow: 0 0 28px rgba(156, 165, 255, 0.38);
+  }
+
+  /* ── Card: Atendimento 24/7 (span 6, 16/10) ── */
+  .glass-tile-atendimento {
+    grid-column: span 6;
+    aspect-ratio: 16/10;
+    background: linear-gradient(145deg, rgba(0, 22, 48, 0.52) 0%, rgba(0, 6, 18, 0.68) 100%);
+    --glow-col: rgba(0, 230, 255, 0.22);
+  }
+  .glass-tile-atendimento:hover {
+    border-color: rgba(0, 230, 255, 0.28);
+    box-shadow:
+      0 0 0 1px rgba(0,230,255,0.05),
+      0 24px 70px rgba(0,0,0,0.55),
+      0 0 80px rgba(0,230,255,0.07),
+      inset 0 1px 0 rgba(0,230,255,0.14);
+  }
+  .glass-tile-atendimento .glass-icon {
+    background: rgba(0,230,255,0.08);
+    border: 1px solid rgba(0,230,255,0.28);
+    color: var(--accent);
+    box-shadow: 0 0 18px rgba(0,230,255,0.12);
+  }
+  .glass-tile-atendimento:hover .glass-icon { box-shadow: 0 0 30px rgba(0,230,255,0.40); }
+
+  /* ── Card: Lead Hunter (span 6, 16/10) ── */
+  .glass-tile-leads {
+    grid-column: span 6;
+    aspect-ratio: 16/10;
+    background: linear-gradient(145deg, rgba(0, 28, 20, 0.52) 0%, rgba(0, 6, 4, 0.68) 100%);
+    --glow-col: rgba(57, 255, 180, 0.22);
+  }
+  .glass-tile-leads:hover {
+    border-color: rgba(57,255,180,0.26);
+    box-shadow:
+      0 0 0 1px rgba(57,255,180,0.05),
+      0 24px 70px rgba(0,0,0,0.55),
+      0 0 80px rgba(57,255,180,0.07),
+      inset 0 1px 0 rgba(57,255,180,0.16);
+  }
+  .glass-tile-leads .glass-icon {
+    background: rgba(57,255,180,0.09);
+    border: 1px solid rgba(57,255,180,0.30);
+    color: var(--neon-green);
+    box-shadow: 0 0 18px rgba(57,255,180,0.12);
+  }
+  .glass-tile-leads:hover .glass-icon { box-shadow: 0 0 30px rgba(57,255,180,0.38); }
+
+  /* ── Card: Suporte Técnico (span 12, 21/9) ── */
+  .glass-tile-suporte {
+    grid-column: span 12;
+    aspect-ratio: 21/9;
+    background: linear-gradient(145deg, rgba(4, 8, 48, 0.52) 0%, rgba(2, 2, 18, 0.68) 100%);
+    --glow-col: rgba(100, 140, 255, 0.22);
+  }
+  .glass-tile-suporte:hover {
+    border-color: rgba(100,140,255,0.26);
+    box-shadow:
+      0 0 0 1px rgba(100,140,255,0.05),
+      0 24px 70px rgba(0,0,0,0.55),
+      0 0 80px rgba(100,140,255,0.07),
+      inset 0 1px 0 rgba(100,140,255,0.14);
+  }
+  .glass-tile-suporte .glass-icon {
+    background: rgba(100,140,255,0.08);
+    border: 1px solid rgba(100,140,255,0.28);
+    color: #6490ff;
+    box-shadow: 0 0 18px rgba(100,140,255,0.12);
+    bottom: 78px;
+  }
+  .glass-tile-suporte:hover .glass-icon { box-shadow: 0 0 30px rgba(100,140,255,0.40); }
+  .glass-tile-suporte .glass-meta { padding: 16px 28px 22px; }
+  .glass-tile-suporte .glass-meta .title { font-size: 24px; }
+
+  /* ── Neural network pulse animation ── */
+  @keyframes glassNodePulse {
+    0%,100% { opacity:0.18; transform:scale(1); }
+    50%      { opacity:0.50; transform:scale(1.55); }
+  }
+  .gn-pulse {
+    animation: glassNodePulse 2.8s ease-in-out infinite;
+    transform-box: fill-box;
+    transform-origin: center;
+  }
+  .gn-p2 { animation-delay: 0.85s; }
+  .gn-p3 { animation-delay: 1.70s; }
+  .gn-p4 { animation-delay: 0.42s; }
+  .gn-p5 { animation-delay: 1.28s; }
+
+  /* ── Hex grid active glow animation ── */
+  @keyframes hexGlow {
+    0%,100% { opacity:0.75; }
+    50%      { opacity:1.00; }
+  }
+  .hx-active { animation: hexGlow 3.2s ease-in-out infinite; }
+  .hx-a2     { animation-delay:1.06s; }
+  .hx-a3     { animation-delay:2.13s; }
+
+  /* Responsive glass tiles */
+  @media (max-width: 860px) {
+    .glass-tile,
+    .glass-tile-atendimento,
+    .glass-tile-leads,
+    .glass-tile-suporte {
+      grid-column: span 2;
+      aspect-ratio: 16/11;
+    }
+    .glass-icon { bottom: 86px; }
+    .glass-tile-suporte .glass-icon { bottom: 86px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- Loader -->
+<div id="loader">
+  <div class="l-mark">GenesIA / Inicializando sistemas</div>
+  <div class="l-pct"><span id="pct">000</span>%</div>
+  <div class="l-bar" id="bar"></div>
+</div>
+
+<!-- Custom cursor -->
+<div class="cursor-outer" id="cursor-outer"></div>
+<div class="cursor-inner" id="cursor-inner"></div>
+
+<!-- Header -->
+<header>
+  <a href="#" class="logo"><span class="dot"></span> <b>Genes<span class="ia">IA</span></b></a>
+  <nav>
+    <ul>
+      <li><a href="#sobre" data-hover>Estúdio</a></li>
+      <li><a href="#processo" data-hover>Processo</a></li>
+      <li><a href="#casos" data-hover>Casos</a></li>
+      <li><a href="#capacidades" data-hover>Capacidades</a></li>
+      <li><a href="#contato" data-hover>Contato</a></li>
+    </ul>
+  </nav>
+  <a href="#contato" class="header-cta" data-hover>Quero meu agente</a>
+</header>
+
+<!-- Hero -->
+<section class="hero">
+  <canvas id="webgl"></canvas>
+  <div class="hero-grid"></div>
+  <div class="hero-content">
+    <div class="eyebrow">
+      <span class="line"></span>
+      <span>Estúdio de IA · Brasil / Operação remota</span>
+    </div>
+    <h1 class="display">
+      <div class="row"><span><b class="brand">Genes<span class="ia">IA</span></b>: onde a</span></div>
+      <div class="row"><span>inteligência <em>artificial</em></span></div>
+      <div class="row"><span>ganha vida.</span></div>
+    </h1>
+    <div class="hero-meta">
+      <p>Toda grande transformação precisa de um início. Criamos automações personalizadas que servem como o alicerce tecnológico para a escala do seu negócio.</p>
+      <div class="scroll">
+        <span>Role para baixo</span>
+        <div class="arrow"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Marquee -->
+<div class="marquee">
+  <div class="marquee-track">
+    <span class="item">Agentes de IA personalizados <span class="star">✦</span> Automação de processos <span class="star">✦</span> Atendimento 24/7 <span class="star">✦</span> Integrações sob medida <span class="star">✦</span> Inteligência aplicada <span class="star">✦</span></span>
+    <span class="item">Agentes de IA personalizados <span class="star">✦</span> Automação de processos <span class="star">✦</span> Atendimento 24/7 <span class="star">✦</span> Integrações sob medida <span class="star">✦</span> Inteligência aplicada <span class="star">✦</span></span>
+  </div>
+</div>
+
+<!-- About -->
+<section class="about container" id="sobre">
+  <div class="section-label reveal">
+    <span class="num">01 —</span><span>Estúdio</span><span class="line"></span><span>Desde 2024</span>
+  </div>
+  <div class="about-grid">
+    <div class="reveal">
+      <h2>Nascemos para <em>materializar a IA</em> em sistemas que respiram dentro do seu negócio.</h2>
+    </div>
+    <div class="reveal">
+      <p>A GenesIA nasceu em 2024 com um propósito claro: transformar a forma como as empresas operam, eliminando gargalos e ineficiências através da Inteligência Artificial.</p>
+      <p>Nosso fundador, <b>Dênis Diniz</b>, identificou uma oportunidade única ao perceber que grande parte dos obstáculos enfrentados nas operações diárias podiam ser resolvidos com soluções inteligentes e sob medida. Ao seu lado, <b>Paolo Lamego</b>, sócio e desenvolvedor experiente, lidera a equipe técnica responsável por projetar e entregar agentes e automações com excelência.</p>
+      <p>O nome <b>GenesIA</b> deriva de <i>Genesis</i> — o início, a criação — e reflete nosso propósito: criar agentes de IA e automações 100% personalizados, desenhados para as necessidades reais do seu negócio.</p>
+      <div class="stats">
+        <div class="stat"><div class="num"><em>100%</em></div><div class="lbl">Customizado</div></div>
+        <div class="stat"><div class="num"><em>24/7</em></div><div class="lbl">Operação contínua</div></div>
+        <div class="stat"><div class="num"><em>+12</em></div><div class="lbl">Integrações nativas</div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Comparison -->
+<section class="compare container">
+  <div class="section-label reveal">
+    <span class="num">02 —</span><span>Diferencial</span><span class="line"></span><span>Genérico vs GenesIA</span>
+  </div>
+  <div class="compare-head reveal">
+    <h2>IA genérica não resolve. <em>IA do seu jeito</em>, sim.</h2>
+  </div>
+  <div class="compare-grid">
+    <div class="compare-card reveal">
+      <div class="row-x">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+        <span>Sem contexto do negócio</span>
+      </div>
+      <hr>
+      <div class="row-v">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+        <span>Treinado com seus dados, processos e identidade.</span>
+      </div>
+    </div>
+    <div class="compare-card reveal">
+      <div class="row-x">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+        <span>Respostas imprecisas e robóticas</span>
+      </div>
+      <hr>
+      <div class="row-v">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+        <span>Alta assertividade e personalidade própria.</span>
+      </div>
+    </div>
+    <div class="compare-card reveal">
+      <div class="row-x">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+        <span>Difícil de integrar e operar</span>
+      </div>
+      <hr>
+      <div class="row-v">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+        <span>Integração com seus sistemas em dias.</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Process -->
+<section class="process container" id="processo">
+  <div class="section-label reveal">
+    <span class="num">03 —</span><span>Como funciona</span><span class="line"></span><span>Do briefing ao deploy</span>
+  </div>
+  <div class="process-head reveal">
+    <h2>Do briefing ao agente <em>em produção</em>.</h2>
+  </div>
+  <div class="steps">
+    <div class="step reveal">
+      <div class="stepnum">01</div>
+      <div class="ico"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M4.268 21a2 2 0 0 0 1.727 1H18a2 2 0 0 0 2-2V7l-5-5H6a2 2 0 0 0-2 2v3"/><path d="m9 18-1.5-1.5"/><circle cx="5" cy="14" r="3"/></svg></div>
+      <h3>Briefing &amp; Diagnóstico</h3>
+      <p>Entendemos seu negócio, mapeamos processos e definimos objetivos claros para o seu agente.</p>
+    </div>
+    <div class="step reveal">
+      <div class="stepnum">02</div>
+      <div class="ico"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="16" height="16" x="4" y="4" rx="2"/><rect width="6" height="6" x="9" y="9" rx="1"/><path d="M15 2v2"/><path d="M15 20v2"/><path d="M2 15h2"/><path d="M2 9h2"/><path d="M20 15h2"/><path d="M20 9h2"/><path d="M9 2v2"/><path d="M9 20v2"/></svg></div>
+      <h3>Arquitetura do Agente</h3>
+      <p>Desenhamos a estrutura ideal, integrações com seus sistemas e fluxos de conversação.</p>
+    </div>
+    <div class="step reveal">
+      <div class="stepnum">03</div>
+      <div class="ico"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5a3 3 0 1 0-5.997.125 4 4 0 0 0-2.526 5.77 4 4 0 0 0 .556 6.588A4 4 0 1 0 12 18Z"/><path d="M9 13a4.5 4.5 0 0 0 3-4"/><path d="M12 13h4"/><path d="M12 18h6a2 2 0 0 1 2 2v1"/><path d="M12 8h8"/></svg></div>
+      <h3>Treinamento &amp; Customização</h3>
+      <p>Alimentamos o agente com seus dados, tom de voz d regras de negócio específicas.</p>
+    </div>
+    <div class="step reveal">
+      <div class="stepnum">04</div>
+      <div class="ico"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z"/><path d="m12 15-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z"/><path d="M9 12H4s.55-3.03 2-4c1.62-1.08 5 0 5 0"/><path d="M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5"/></svg></div>
+      <h3>Deploy &amp; Suporte Contínuo</h3>
+      <p>Lançamos o agente e garantimos evolução contínua com métricas reais e ajustes.</p>
+    </div>
+  </div>
+</section>
+
+<!-- Casos / Use cases -->
+<section class="work container" id="casos">
+  <div class="section-label reveal">
+    <span class="num">04 —</span><span>Casos de uso</span><span class="line"></span><span>Aplicações reais</span>
+  </div>
+  <div class="work-head reveal">
+    <h2>Um agente para <em>cada desafio</em>.</h2>
+    <div class="filters">
+      <span class="filter active" data-hover>Tudo</span>
+      <span class="filter" data-hover>Atendimento</span>
+      <span class="filter" data-hover>Vendas</span>
+      <span class="filter" data-hover>Operação</span>
+      <span class="filter" data-hover>Dados</span>
+    </div>
+  </div>
+  <div class="grid">
+
+    <!-- ═══════════════════════════════════════════════════
+         001 · Agente 24/7 — GLASSMORPHISM
+         ═══════════════════════════════════════════════════ -->
+    <div class="glass-tile glass-tile-atendimento reveal" data-hover>
+      <div class="glass-glow"></div>
+
+      <!-- Decorative: Neural network mesh — always on, always connected -->
+      <div class="glass-deco">
+        <svg viewBox="0 0 380 240" fill="none" xmlns="http://www.w3.org/2000/svg">
+
+          <!-- ── Connection lines (draw first, behind nodes) ── -->
+          <!-- Top row lateral -->
+          <line x1="40"  y1="35"  x2="115" y2="22"  stroke="rgba(0,230,255,0.22)" stroke-width="1"/>
+          <line x1="115" y1="22"  x2="195" y2="45"  stroke="rgba(0,230,255,0.22)" stroke-width="1"/>
+          <line x1="195" y1="45"  x2="270" y2="28"  stroke="rgba(0,230,255,0.18)" stroke-width="1"/>
+          <line x1="270" y1="28"  x2="340" y2="50"  stroke="rgba(0,230,255,0.18)" stroke-width="1"/>
+          <!-- Top → mid cross-layer -->
+          <line x1="40"  y1="35"  x2="70"  y2="90"  stroke="rgba(0,230,255,0.18)" stroke-width="1"/>
+          <line x1="115" y1="22"  x2="70"  y2="90"  stroke="rgba(0,230,255,0.26)" stroke-width="1.2"/>
+          <line x1="115" y1="22"  x2="148" y2="78"  stroke="rgba(0,230,255,0.30)" stroke-width="1.2"/>
+          <line x1="195" y1="45"  x2="148" y2="78"  stroke="rgba(0,230,255,0.22)" stroke-width="1"/>
+          <line x1="195" y1="45"  x2="222" y2="102" stroke="rgba(0,230,255,0.30)" stroke-width="1.2"/>
+          <line x1="270" y1="28"  x2="222" y2="102" stroke="rgba(0,230,255,0.22)" stroke-width="1"/>
+          <line x1="270" y1="28"  x2="298" y2="85"  stroke="rgba(0,230,255,0.20)" stroke-width="1"/>
+          <line x1="340" y1="50"  x2="298" y2="85"  stroke="rgba(0,230,255,0.18)" stroke-width="1"/>
+          <line x1="340" y1="50"  x2="355" y2="100" stroke="rgba(0,230,255,0.18)" stroke-width="1"/>
+          <!-- Mid row lateral -->
+          <line x1="70"  y1="90"  x2="148" y2="78"  stroke="rgba(0,230,255,0.22)" stroke-width="1"/>
+          <line x1="148" y1="78"  x2="222" y2="102" stroke="rgba(0,230,255,0.32)" stroke-width="1.5"/>
+          <line x1="222" y1="102" x2="298" y2="85"  stroke="rgba(0,230,255,0.26)" stroke-width="1.2"/>
+          <line x1="298" y1="85"  x2="355" y2="100" stroke="rgba(0,230,255,0.20)" stroke-width="1"/>
+          <!-- Mid → lower cross-layer -->
+          <line x1="70"  y1="90"  x2="48"  y2="150" stroke="rgba(0,230,255,0.18)" stroke-width="1"/>
+          <line x1="148" y1="78"  x2="125" y2="138" stroke="rgba(0,230,255,0.22)" stroke-width="1"/>
+          <line x1="148" y1="78"  x2="205" y2="162" stroke="rgba(0,230,255,0.26)" stroke-width="1.2"/>
+          <line x1="222" y1="102" x2="205" y2="162" stroke="rgba(0,230,255,0.30)" stroke-width="1.5"/>
+          <line x1="222" y1="102" x2="278" y2="145" stroke="rgba(0,230,255,0.22)" stroke-width="1"/>
+          <line x1="298" y1="85"  x2="278" y2="145" stroke="rgba(0,230,255,0.20)" stroke-width="1"/>
+          <line x1="298" y1="85"  x2="348" y2="158" stroke="rgba(0,230,255,0.18)" stroke-width="1"/>
+          <line x1="355" y1="100" x2="348" y2="158" stroke="rgba(0,230,255,0.18)" stroke-width="1"/>
+          <!-- Lower row lateral -->
+          <line x1="48"  y1="150" x2="125" y2="138" stroke="rgba(0,230,255,0.18)" stroke-width="1"/>
+          <line x1="125" y1="138" x2="205" y2="162" stroke="rgba(0,230,255,0.22)" stroke-width="1"/>
+          <line x1="205" y1="162" x2="278" y2="145" stroke="rgba(0,230,255,0.30)" stroke-width="1.5"/>
+          <line x1="278" y1="145" x2="348" y2="158" stroke="rgba(0,230,255,0.20)" stroke-width="1"/>
+          <!-- Lower → bottom cross-layer -->
+          <line x1="48"  y1="150" x2="85"  y2="205" stroke="rgba(0,230,255,0.16)" stroke-width="1"/>
+          <line x1="125" y1="138" x2="85"  y2="205" stroke="rgba(0,230,255,0.18)" stroke-width="1"/>
+          <line x1="125" y1="138" x2="185" y2="195" stroke="rgba(0,230,255,0.20)" stroke-width="1"/>
+          <line x1="205" y1="162" x2="185" y2="195" stroke="rgba(0,230,255,0.22)" stroke-width="1"/>
+          <line x1="278" y1="145" x2="268" y2="208" stroke="rgba(0,230,255,0.26)" stroke-width="1.2"/>
+          <line x1="348" y1="158" x2="268" y2="208" stroke="rgba(0,230,255,0.20)" stroke-width="1"/>
+          <line x1="348" y1="158" x2="345" y2="200" stroke="rgba(0,230,255,0.18)" stroke-width="1"/>
+          <!-- Bottom row lateral -->
+          <line x1="85"  y1="205" x2="185" y2="195" stroke="rgba(0,230,255,0.18)" stroke-width="1"/>
+          <line x1="185" y1="195" x2="268" y2="208" stroke="rgba(0,230,255,0.20)" stroke-width="1"/>
+          <line x1="268" y1="208" x2="345" y2="200" stroke="rgba(0,230,255,0.18)" stroke-width="1"/>
+
+          <!-- ── Pulsing rings (active/hub nodes — drawn under solid node) ── -->
+          <circle cx="115" cy="22"  r="17" fill="rgba(0,230,255,0.15)" class="gn-pulse"/>
+          <circle cx="148" cy="78"  r="19" fill="rgba(0,230,255,0.18)" class="gn-pulse gn-p2"/>
+          <circle cx="222" cy="102" r="22" fill="rgba(0,230,255,0.20)" class="gn-pulse gn-p3"/>
+          <circle cx="205" cy="162" r="19" fill="rgba(0,230,255,0.16)" class="gn-pulse gn-p4"/>
+          <circle cx="268" cy="208" r="16" fill="rgba(0,230,255,0.14)" class="gn-pulse gn-p5"/>
+
+          <!-- ── Regular nodes (dim) ── -->
+          <circle cx="40"  cy="35"  r="3.5" fill="rgba(0,230,255,0.45)" stroke="rgba(0,230,255,0.70)" stroke-width="1.2"/>
+          <circle cx="195" cy="45"  r="3.5" fill="rgba(0,230,255,0.42)" stroke="rgba(0,230,255,0.65)" stroke-width="1.2"/>
+          <circle cx="270" cy="28"  r="3"   fill="rgba(0,230,255,0.38)" stroke="rgba(0,230,255,0.60)" stroke-width="1.2"/>
+          <circle cx="340" cy="50"  r="3"   fill="rgba(0,230,255,0.38)" stroke="rgba(0,230,255,0.60)" stroke-width="1.2"/>
+          <circle cx="70"  cy="90"  r="3.5" fill="rgba(0,230,255,0.42)" stroke="rgba(0,230,255,0.65)" stroke-width="1.2"/>
+          <circle cx="298" cy="85"  r="3.5" fill="rgba(0,230,255,0.42)" stroke="rgba(0,230,255,0.65)" stroke-width="1.2"/>
+          <circle cx="355" cy="100" r="3"   fill="rgba(0,230,255,0.38)" stroke="rgba(0,230,255,0.60)" stroke-width="1.2"/>
+          <circle cx="48"  cy="150" r="3"   fill="rgba(0,230,255,0.38)" stroke="rgba(0,230,255,0.60)" stroke-width="1.2"/>
+          <circle cx="125" cy="138" r="3.5" fill="rgba(0,230,255,0.42)" stroke="rgba(0,230,255,0.65)" stroke-width="1.2"/>
+          <circle cx="278" cy="145" r="3.5" fill="rgba(0,230,255,0.45)" stroke="rgba(0,230,255,0.70)" stroke-width="1.2"/>
+          <circle cx="348" cy="158" r="3"   fill="rgba(0,230,255,0.38)" stroke="rgba(0,230,255,0.60)" stroke-width="1.2"/>
+          <circle cx="85"  cy="205" r="3"   fill="rgba(0,230,255,0.35)" stroke="rgba(0,230,255,0.55)" stroke-width="1.2"/>
+          <circle cx="185" cy="195" r="3.5" fill="rgba(0,230,255,0.40)" stroke="rgba(0,230,255,0.62)" stroke-width="1.2"/>
+          <circle cx="345" cy="200" r="3"   fill="rgba(0,230,255,0.35)" stroke="rgba(0,230,255,0.55)" stroke-width="1.2"/>
+
+          <!-- ── Active / hub nodes (solid, glowing) ── -->
+          <circle cx="115" cy="22"  r="6.5" fill="rgba(0,230,255,0.92)" stroke="rgba(255,255,255,0.55)" stroke-width="1.5"/>
+          <circle cx="148" cy="78"  r="7.5" fill="rgba(0,230,255,0.96)" stroke="rgba(255,255,255,0.62)" stroke-width="2"/>
+          <circle cx="222" cy="102" r="9"   fill="rgba(0,230,255,1.00)" stroke="rgba(255,255,255,0.68)" stroke-width="2"/>
+          <circle cx="205" cy="162" r="7.5" fill="rgba(0,230,255,0.93)" stroke="rgba(255,255,255,0.58)" stroke-width="2"/>
+          <circle cx="268" cy="208" r="6.5" fill="rgba(0,230,255,0.88)" stroke="rgba(255,255,255,0.52)" stroke-width="1.5"/>
+        </svg>
+      </div>
+
+      <div class="glass-veil"></div>
+
+      <!-- Icon: signal / broadcast -->
+      <div class="glass-icon">
+        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M2 16.1A5 5 0 0 1 5.9 20M2 12.05A9 9 0 0 1 9.95 20M2 8V6a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-6"/>
+          <line x1="2" y1="20" x2="2.01" y2="20"/>
+        </svg>
+      </div>
+
+      <div class="glass-meta">
+        <div class="title">Agente 24/7</div>
+        <div class="sub">Atendimento ao cliente em qualquer canal</div>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════
+         002 · Lead Hunter — GLASSMORPHISM
+         ═══════════════════════════════════════════════════ -->
+    <div class="glass-tile glass-tile-leads reveal" data-hover>
+      <div class="glass-glow"></div>
+
+      <!-- Decorative: Precision target + data funnel -->
+      <div class="glass-deco">
+        <svg viewBox="0 0 380 240" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <!-- Outer ambient rings -->
+          <circle cx="190" cy="118" r="105" stroke="rgba(57,255,180,0.06)" stroke-width="1" fill="none"/>
+          <!-- Target rings -->
+          <circle cx="190" cy="118" r="88"  stroke="rgba(57,255,180,0.10)" stroke-width="1"   fill="none"/>
+          <circle cx="190" cy="118" r="70"  stroke="rgba(57,255,180,0.14)" stroke-width="1.5" fill="none"/>
+          <circle cx="190" cy="118" r="50"  stroke="rgba(57,255,180,0.22)" stroke-width="1.5" fill="none"/>
+          <circle cx="190" cy="118" r="30"  stroke="rgba(57,255,180,0.36)" stroke-width="2"   fill="rgba(57,255,180,0.04)"/>
+          <!-- Crosshair lines — dashed -->
+          <line x1="102" y1="118" x2="160" y2="118" stroke="rgba(57,255,180,0.32)" stroke-width="1.5" stroke-dasharray="5 4"/>
+          <line x1="220" y1="118" x2="278" y2="118" stroke="rgba(57,255,180,0.32)" stroke-width="1.5" stroke-dasharray="5 4"/>
+          <line x1="190" y1="30"  x2="190" y2="88"  stroke="rgba(57,255,180,0.32)" stroke-width="1.5" stroke-dasharray="5 4"/>
+          <line x1="190" y1="148" x2="190" y2="206" stroke="rgba(57,255,180,0.32)" stroke-width="1.5" stroke-dasharray="5 4"/>
+          <!-- Bullseye center glow -->
+          <circle cx="190" cy="118" r="10"  fill="rgba(57,255,180,0.28)" stroke="rgba(57,255,180,0.80)" stroke-width="2"/>
+          <circle cx="190" cy="118" r="4.5" fill="rgba(57,255,180,1)"    stroke="rgba(255,255,255,0.60)" stroke-width="1.5"/>
+          <circle cx="190" cy="118" r="22"  fill="rgba(57,255,180,0.07)"/>
+          <!-- Data streams converging from 4 directions -->
+          <!-- Top-right stream -->
+          <line x1="348" y1="28" x2="218" y2="108" stroke="rgba(57,255,180,0.35)" stroke-width="1.2" stroke-dasharray="4 5"/>
+          <circle cx="348" cy="28"  r="4"   fill="rgba(57,255,180,0.70)" stroke="rgba(57,255,180,1)" stroke-width="1"/>
+          <circle cx="300" cy="60"  r="3"   fill="rgba(57,255,180,0.55)"/>
+          <circle cx="258" cy="86"  r="2.5" fill="rgba(57,255,180,0.45)"/>
+          <!-- Bottom-right stream -->
+          <line x1="340" y1="205" x2="218" y2="130" stroke="rgba(57,255,180,0.30)" stroke-width="1.2" stroke-dasharray="4 5"/>
+          <circle cx="340" cy="205" r="4"   fill="rgba(57,255,180,0.65)" stroke="rgba(57,255,180,1)" stroke-width="1"/>
+          <circle cx="295" cy="175" r="3"   fill="rgba(57,255,180,0.50)"/>
+          <!-- Top-left stream -->
+          <line x1="42"  y1="42"  x2="164" y2="108" stroke="rgba(57,255,180,0.28)" stroke-width="1.2" stroke-dasharray="4 5"/>
+          <circle cx="42"  cy="42"  r="3.5" fill="rgba(57,255,180,0.55)"/>
+          <circle cx="96"  cy="72"  r="2.5" fill="rgba(57,255,180,0.40)"/>
+          <!-- Left stream -->
+          <line x1="28"  y1="152" x2="162" y2="124" stroke="rgba(57,255,180,0.25)" stroke-width="1.2" stroke-dasharray="4 5"/>
+          <circle cx="28"  cy="152" r="3.5" fill="rgba(57,255,180,0.50)"/>
+          <circle cx="82"  cy="138" r="2.5" fill="rgba(57,255,180,0.38)"/>
+          <!-- Corner qualifier bracket (top-right) -->
+          <path d="M 308 34 L 330 34 L 330 56" stroke="rgba(57,255,180,0.60)" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+          <text x="336" y="48" font-size="8.5" fill="rgba(57,255,180,0.75)" font-family="Space Grotesk, sans-serif" letter-spacing="1.5" font-weight="600">LEAD</text>
+          <!-- Tick marks on largest ring at 45° intervals -->
+          <line x1="252" y1="56"  x2="246" y2="62"  stroke="rgba(57,255,180,0.45)" stroke-width="1.5" stroke-linecap="round"/>
+          <line x1="252" y1="180" x2="246" y2="174" stroke="rgba(57,255,180,0.45)" stroke-width="1.5" stroke-linecap="round"/>
+          <line x1="128" y1="56"  x2="134" y2="62"  stroke="rgba(57,255,180,0.35)" stroke-width="1.5" stroke-linecap="round"/>
+          <line x1="128" y1="180" x2="134" y2="174" stroke="rgba(57,255,180,0.35)" stroke-width="1.5" stroke-linecap="round"/>
+        </svg>
+      </div>
+
+      <div class="glass-veil"></div>
+
+      <!-- Icon: target / crosshair -->
+      <div class="glass-icon">
+        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="10"/>
+          <circle cx="12" cy="12" r="6"/>
+          <circle cx="12" cy="12" r="2"/>
+          <line x1="22" y1="12" x2="18" y2="12"/>
+          <line x1="6"  y1="12" x2="2"  y2="12"/>
+          <line x1="12" y1="6"  x2="12" y2="2"/>
+          <line x1="12" y1="22" x2="12" y2="18"/>
+        </svg>
+      </div>
+
+      <div class="glass-meta">
+        <div class="title">Lead Hunter</div>
+        <div class="sub">Captura e qualificação automática de leads</div>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════
+         003 · Suporte Técnico Inteligente — GLASSMORPHISM (wide)
+         ═══════════════════════════════════════════════════ -->
+    <div class="glass-tile glass-tile-suporte reveal" data-hover>
+      <div class="glass-glow"></div>
+
+      <!-- Decorative: Isometric hexagonal precision grid -->
+      <div class="glass-deco">
+        <svg viewBox="0 0 580 250" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <!-- Pointy-top hexagon, r=24: vertices at 90°+i*60° -->
+            <polygon id="h" points="0,-24 20.8,-12 20.8,12 0,24 -20.8,12 -20.8,-12"/>
+          </defs>
+
+          <!-- ── Connection lines between active-hex centers ── -->
+          <!-- Central cluster diagonals -->
+          <line x1="279" y1="68"  x2="300" y2="104" stroke="rgba(100,140,255,0.55)" stroke-width="1.5"/>
+          <line x1="279" y1="68"  x2="258" y2="104" stroke="rgba(100,140,255,0.42)" stroke-width="1.2"/>
+          <line x1="321" y1="68"  x2="300" y2="104" stroke="rgba(100,140,255,0.55)" stroke-width="1.5"/>
+          <line x1="321" y1="68"  x2="342" y2="104" stroke="rgba(100,140,255,0.50)" stroke-width="1.5"/>
+          <line x1="300" y1="104" x2="279" y2="140" stroke="rgba(0,230,255,0.65)"   stroke-width="2"/>
+          <line x1="300" y1="104" x2="321" y2="140" stroke="rgba(0,230,255,0.70)"   stroke-width="2"/>
+          <line x1="342" y1="104" x2="321" y2="140" stroke="rgba(0,230,255,0.58)"   stroke-width="1.5"/>
+          <line x1="342" y1="104" x2="363" y2="140" stroke="rgba(0,230,255,0.55)"   stroke-width="1.5"/>
+          <line x1="279" y1="140" x2="258" y2="176" stroke="rgba(100,140,255,0.42)" stroke-width="1.2"/>
+          <line x1="279" y1="140" x2="300" y2="176" stroke="rgba(100,140,255,0.48)" stroke-width="1.2"/>
+          <line x1="321" y1="140" x2="300" y2="176" stroke="rgba(100,140,255,0.50)" stroke-width="1.2"/>
+          <line x1="321" y1="140" x2="342" y2="176" stroke="rgba(0,230,255,0.62)"   stroke-width="1.5"/>
+          <line x1="363" y1="140" x2="342" y2="176" stroke="rgba(0,230,255,0.52)"   stroke-width="1.2"/>
+          <line x1="363" y1="140" x2="384" y2="176" stroke="rgba(100,140,255,0.38)" stroke-width="1"/>
+
+          <!-- ── Regular hexes (dim, outlined — background structure) ── -->
+          <!-- Row 1 y=68 -->
+          <use href="#h" transform="translate(111,68)"  fill="rgba(100,140,255,0.04)" stroke="rgba(100,140,255,0.20)" stroke-width="1"/>
+          <use href="#h" transform="translate(153,68)"  fill="rgba(100,140,255,0.05)" stroke="rgba(100,140,255,0.24)" stroke-width="1"/>
+          <use href="#h" transform="translate(195,68)"  fill="rgba(100,140,255,0.05)" stroke="rgba(100,140,255,0.24)" stroke-width="1"/>
+          <use href="#h" transform="translate(237,68)"  fill="rgba(100,140,255,0.06)" stroke="rgba(100,140,255,0.28)" stroke-width="1"/>
+          <use href="#h" transform="translate(363,68)"  fill="rgba(100,140,255,0.06)" stroke="rgba(100,140,255,0.28)" stroke-width="1"/>
+          <use href="#h" transform="translate(405,68)"  fill="rgba(100,140,255,0.05)" stroke="rgba(100,140,255,0.22)" stroke-width="1"/>
+          <use href="#h" transform="translate(447,68)"  fill="rgba(100,140,255,0.04)" stroke="rgba(100,140,255,0.18)" stroke-width="1"/>
+          <use href="#h" transform="translate(489,68)"  fill="rgba(100,140,255,0.03)" stroke="rgba(100,140,255,0.15)" stroke-width="1"/>
+          <use href="#h" transform="translate(531,68)"  fill="rgba(100,140,255,0.02)" stroke="rgba(100,140,255,0.12)" stroke-width="1"/>
+          <!-- Row 2 y=104 -->
+          <use href="#h" transform="translate(132,104)" fill="rgba(100,140,255,0.04)" stroke="rgba(100,140,255,0.20)" stroke-width="1"/>
+          <use href="#h" transform="translate(174,104)" fill="rgba(100,140,255,0.05)" stroke="rgba(100,140,255,0.24)" stroke-width="1"/>
+          <use href="#h" transform="translate(216,104)" fill="rgba(100,140,255,0.06)" stroke="rgba(100,140,255,0.28)" stroke-width="1"/>
+          <use href="#h" transform="translate(258,104)" fill="rgba(100,140,255,0.08)" stroke="rgba(100,140,255,0.34)" stroke-width="1.2"/>
+          <use href="#h" transform="translate(384,104)" fill="rgba(100,140,255,0.07)" stroke="rgba(100,140,255,0.30)" stroke-width="1"/>
+          <use href="#h" transform="translate(426,104)" fill="rgba(100,140,255,0.05)" stroke="rgba(100,140,255,0.22)" stroke-width="1"/>
+          <use href="#h" transform="translate(468,104)" fill="rgba(100,140,255,0.04)" stroke="rgba(100,140,255,0.18)" stroke-width="1"/>
+          <use href="#h" transform="translate(510,104)" fill="rgba(100,140,255,0.03)" stroke="rgba(100,140,255,0.14)" stroke-width="1"/>
+          <!-- Row 3 y=140 -->
+          <use href="#h" transform="translate(111,140)" fill="rgba(100,140,255,0.03)" stroke="rgba(100,140,255,0.16)" stroke-width="1"/>
+          <use href="#h" transform="translate(153,140)" fill="rgba(100,140,255,0.04)" stroke="rgba(100,140,255,0.20)" stroke-width="1"/>
+          <use href="#h" transform="translate(195,140)" fill="rgba(100,140,255,0.05)" stroke="rgba(100,140,255,0.24)" stroke-width="1"/>
+          <use href="#h" transform="translate(237,140)" fill="rgba(100,140,255,0.07)" stroke="rgba(100,140,255,0.30)" stroke-width="1.2"/>
+          <use href="#h" transform="translate(405,140)" fill="rgba(100,140,255,0.06)" stroke="rgba(100,140,255,0.26)" stroke-width="1"/>
+          <use href="#h" transform="translate(447,140)" fill="rgba(100,140,255,0.05)" stroke="rgba(100,140,255,0.22)" stroke-width="1"/>
+          <use href="#h" transform="translate(489,140)" fill="rgba(100,140,255,0.04)" stroke="rgba(100,140,255,0.18)" stroke-width="1"/>
+          <use href="#h" transform="translate(531,140)" fill="rgba(100,140,255,0.02)" stroke="rgba(100,140,255,0.12)" stroke-width="1"/>
+          <!-- Row 4 y=176 -->
+          <use href="#h" transform="translate(132,176)" fill="rgba(100,140,255,0.03)" stroke="rgba(100,140,255,0.16)" stroke-width="1"/>
+          <use href="#h" transform="translate(174,176)" fill="rgba(100,140,255,0.04)" stroke="rgba(100,140,255,0.20)" stroke-width="1"/>
+          <use href="#h" transform="translate(216,176)" fill="rgba(100,140,255,0.05)" stroke="rgba(100,140,255,0.24)" stroke-width="1"/>
+          <use href="#h" transform="translate(258,176)" fill="rgba(100,140,255,0.06)" stroke="rgba(100,140,255,0.26)" stroke-width="1"/>
+          <use href="#h" transform="translate(300,176)" fill="rgba(100,140,255,0.07)" stroke="rgba(100,140,255,0.30)" stroke-width="1"/>
+          <use href="#h" transform="translate(384,176)" fill="rgba(100,140,255,0.06)" stroke="rgba(100,140,255,0.26)" stroke-width="1"/>
+          <use href="#h" transform="translate(426,176)" fill="rgba(100,140,255,0.05)" stroke="rgba(100,140,255,0.22)" stroke-width="1"/>
+          <use href="#h" transform="translate(468,176)" fill="rgba(100,140,255,0.04)" stroke="rgba(100,140,255,0.18)" stroke-width="1"/>
+          <use href="#h" transform="translate(510,176)" fill="rgba(100,140,255,0.03)" stroke="rgba(100,140,255,0.14)" stroke-width="1"/>
+          <!-- Row 5 y=212 -->
+          <use href="#h" transform="translate(153,212)" fill="rgba(100,140,255,0.03)" stroke="rgba(100,140,255,0.14)" stroke-width="1"/>
+          <use href="#h" transform="translate(195,212)" fill="rgba(100,140,255,0.04)" stroke="rgba(100,140,255,0.18)" stroke-width="1"/>
+          <use href="#h" transform="translate(237,212)" fill="rgba(100,140,255,0.05)" stroke="rgba(100,140,255,0.22)" stroke-width="1"/>
+          <use href="#h" transform="translate(279,212)" fill="rgba(100,140,255,0.05)" stroke="rgba(100,140,255,0.22)" stroke-width="1"/>
+          <use href="#h" transform="translate(321,212)" fill="rgba(100,140,255,0.05)" stroke="rgba(100,140,255,0.22)" stroke-width="1"/>
+          <use href="#h" transform="translate(363,212)" fill="rgba(100,140,255,0.04)" stroke="rgba(100,140,255,0.18)" stroke-width="1"/>
+          <use href="#h" transform="translate(405,212)" fill="rgba(100,140,255,0.03)" stroke="rgba(100,140,255,0.14)" stroke-width="1"/>
+          <use href="#h" transform="translate(447,212)" fill="rgba(100,140,255,0.02)" stroke="rgba(100,140,255,0.10)" stroke-width="1"/>
+          <use href="#h" transform="translate(489,212)" fill="rgba(100,140,255,0.02)" stroke="rgba(100,140,255,0.08)" stroke-width="1"/>
+
+          <!-- ── Active hex outer glows (soft blur layer, drawn first) ── -->
+          <use href="#h" transform="translate(279,68)"  fill="rgba(0,230,255,0.18)" stroke="none" style="filter:blur(7px)"/>
+          <use href="#h" transform="translate(321,68)"  fill="rgba(0,230,255,0.15)" stroke="none" style="filter:blur(6px)"/>
+          <use href="#h" transform="translate(300,104)" fill="rgba(0,230,255,0.28)" stroke="none" style="filter:blur(9px)"/>
+          <use href="#h" transform="translate(342,104)" fill="rgba(0,230,255,0.22)" stroke="none" style="filter:blur(7px)"/>
+          <use href="#h" transform="translate(279,140)" fill="rgba(0,230,255,0.22)" stroke="none" style="filter:blur(7px)"/>
+          <use href="#h" transform="translate(321,140)" fill="rgba(0,230,255,0.26)" stroke="none" style="filter:blur(8px)"/>
+          <use href="#h" transform="translate(363,140)" fill="rgba(0,230,255,0.18)" stroke="none" style="filter:blur(6px)"/>
+          <use href="#h" transform="translate(342,176)" fill="rgba(0,230,255,0.22)" stroke="none" style="filter:blur(7px)"/>
+
+          <!-- ── Active hexes (solid, glowing fill) ── -->
+          <use href="#h" transform="translate(279,68)"  fill="rgba(0,230,255,0.12)" stroke="rgba(0,230,255,0.72)" stroke-width="1.5"/>
+          <use href="#h" transform="translate(321,68)"  fill="rgba(0,230,255,0.10)" stroke="rgba(0,230,255,0.62)" stroke-width="1.5"/>
+          <use href="#h" transform="translate(300,104)" fill="rgba(0,230,255,0.20)" stroke="rgba(0,230,255,0.92)" stroke-width="2"   class="hx-active"/>
+          <use href="#h" transform="translate(342,104)" fill="rgba(0,230,255,0.16)" stroke="rgba(0,230,255,0.82)" stroke-width="2"/>
+          <use href="#h" transform="translate(279,140)" fill="rgba(0,230,255,0.16)" stroke="rgba(0,230,255,0.80)" stroke-width="1.5"/>
+          <use href="#h" transform="translate(321,140)" fill="rgba(0,230,255,0.18)" stroke="rgba(0,230,255,0.88)" stroke-width="2"   class="hx-active hx-a2"/>
+          <use href="#h" transform="translate(363,140)" fill="rgba(0,230,255,0.14)" stroke="rgba(0,230,255,0.72)" stroke-width="1.5"/>
+          <use href="#h" transform="translate(342,176)" fill="rgba(0,230,255,0.16)" stroke="rgba(0,230,255,0.80)" stroke-width="1.5" class="hx-active hx-a3"/>
+
+          <!-- ── Vertex connector nodes (precision intersections) ── -->
+          <circle cx="300" cy="80"  r="3"   fill="rgba(0,230,255,0.88)" stroke="rgba(255,255,255,0.40)" stroke-width="1.2"/>
+          <circle cx="321" cy="104" r="4.5" fill="rgba(0,230,255,1.00)" stroke="rgba(255,255,255,0.60)" stroke-width="1.5"/>
+          <circle cx="279" cy="104" r="3.5" fill="rgba(0,230,255,0.90)" stroke="rgba(255,255,255,0.45)" stroke-width="1.2"/>
+          <circle cx="300" cy="128" r="4"   fill="rgba(0,230,255,0.95)" stroke="rgba(255,255,255,0.52)" stroke-width="1.5"/>
+          <circle cx="342" cy="128" r="3.5" fill="rgba(0,230,255,0.88)" stroke="rgba(255,255,255,0.42)" stroke-width="1.2"/>
+          <circle cx="321" cy="152" r="4.5" fill="rgba(0,230,255,1.00)" stroke="rgba(255,255,255,0.58)" stroke-width="1.5"/>
+          <circle cx="342" cy="152" r="3"   fill="rgba(0,230,255,0.82)" stroke="rgba(255,255,255,0.38)" stroke-width="1.2"/>
+          <circle cx="363" cy="128" r="3"   fill="rgba(0,230,255,0.80)" stroke="rgba(255,255,255,0.35)" stroke-width="1.2"/>
+
+          <!-- ── PRECISÃO badge ── -->
+          <rect x="448" y="84" width="88" height="22" rx="5" fill="rgba(100,140,255,0.12)" stroke="rgba(100,140,255,0.42)" stroke-width="1"/>
+          <text x="492" y="99" text-anchor="middle" font-size="8.5" fill="rgba(100,140,255,0.88)" font-family="Space Grotesk, sans-serif" letter-spacing="1.8" font-weight="600">PRECISÃO</text>
+        </svg>
+      </div>
+
+      <div class="glass-veil"></div>
+
+      <!-- Icon: lightning / resolve -->
+      <div class="glass-icon">
+        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
+        </svg>
+      </div>
+
+      <div class="glass-meta">
+        <div class="title">Suporte Técnico Inteligente</div>
+        <div class="sub">Resolve tickets comuns e escala apenas o que é realmente complexo</div>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════
+         004 · RH Interno — GLASSMORPHISM CARD
+         ═══════════════════════════════════════════════════ -->
+    <div class="glass-tile glass-tile-rh reveal" data-hover>
+      <!-- Mouse glow -->
+      <div class="glass-glow"></div>
+
+      <!-- Decorative illustration: people / onboarding -->
+      <div class="glass-deco">
+        <svg viewBox="0 0 260 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <!-- Connection line background -->
+          <line x1="65" y1="100" x2="130" y2="100" stroke="rgba(57,255,180,0.18)" stroke-width="1.5" stroke-dasharray="5 4"/>
+          <line x1="130" y1="100" x2="195" y2="100" stroke="rgba(57,255,180,0.18)" stroke-width="1.5" stroke-dasharray="5 4"/>
+          <!-- Person 1 (left) -->
+          <circle cx="65" cy="68" r="26" fill="rgba(57,255,180,0.10)" stroke="rgba(57,255,180,0.38)" stroke-width="1.5"/>
+          <circle cx="65" cy="62" r="12" fill="rgba(57,255,180,0.18)" stroke="rgba(57,255,180,0.5)" stroke-width="1.5"/>
+          <path d="M38 120 Q38 97 65 97 Q92 97 92 120" stroke="rgba(57,255,180,0.38)" stroke-width="1.5" fill="rgba(57,255,180,0.08)" stroke-linecap="round"/>
+          <!-- Person 2 (center – highlighted) -->
+          <circle cx="130" cy="60" r="34" fill="rgba(57,255,180,0.15)" stroke="rgba(57,255,180,0.55)" stroke-width="2"/>
+          <circle cx="130" cy="52" r="15" fill="rgba(57,255,180,0.28)" stroke="rgba(57,255,180,0.70)" stroke-width="2"/>
+          <path d="M97 122 Q97 92 130 92 Q163 92 163 122" stroke="rgba(57,255,180,0.55)" stroke-width="2" fill="rgba(57,255,180,0.12)" stroke-linecap="round"/>
+          <!-- Person 3 (right) -->
+          <circle cx="195" cy="68" r="26" fill="rgba(57,255,180,0.10)" stroke="rgba(57,255,180,0.38)" stroke-width="1.5"/>
+          <circle cx="195" cy="62" r="12" fill="rgba(57,255,180,0.18)" stroke="rgba(57,255,180,0.5)" stroke-width="1.5"/>
+          <path d="M168 120 Q168 97 195 97 Q222 97 222 120" stroke="rgba(57,255,180,0.38)" stroke-width="1.5" fill="rgba(57,255,180,0.08)" stroke-linecap="round"/>
+          <!-- Plus badge on center person (onboarding indicator) -->
+          <circle cx="148" cy="42" r="10" fill="rgba(57,255,180,0.25)" stroke="rgba(57,255,180,0.7)" stroke-width="1.5"/>
+          <line x1="148" y1="37" x2="148" y2="47" stroke="rgba(57,255,180,1)" stroke-width="2" stroke-linecap="round"/>
+          <line x1="143" y1="42" x2="153" y2="42" stroke="rgba(57,255,180,1)" stroke-width="2" stroke-linecap="round"/>
+          <!-- Progress bar rows (onboarding steps) -->
+          <rect x="55" y="145" width="150" height="6" rx="3" fill="rgba(57,255,180,0.08)" stroke="rgba(57,255,180,0.2)" stroke-width="1"/>
+          <rect x="55" y="145" width="110" height="6" rx="3" fill="rgba(57,255,180,0.45)"/>
+          <rect x="55" y="160" width="150" height="6" rx="3" fill="rgba(57,255,180,0.08)" stroke="rgba(57,255,180,0.2)" stroke-width="1"/>
+          <rect x="55" y="160" width="70" height="6" rx="3" fill="rgba(57,255,180,0.3)"/>
+          <rect x="55" y="175" width="150" height="6" rx="3" fill="rgba(57,255,180,0.08)" stroke="rgba(57,255,180,0.2)" stroke-width="1"/>
+          <rect x="55" y="175" width="40" height="6" rx="3" fill="rgba(57,255,180,0.18)"/>
+        </svg>
+      </div>
+
+      <!-- Bottom veil -->
+      <div class="glass-veil"></div>
+
+      <!-- Icon -->
+      <div class="glass-icon">
+        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3z"/>
+          <path d="M8 11c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5 5 6.34 5 8s1.34 3 3 3z"/>
+          <path d="M8 13c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+          <path d="M16 13c-.29 0-.62.02-.97.05C16.19 13.89 17 15.02 17 17v2h7v-2c0-2.66-5.33-4-8-4z"/>
+        </svg>
+      </div>
+
+      <!-- Meta -->
+      <div class="glass-meta">
+        <div class="title">RH Interno</div>
+        <div class="sub">Onboarding e benefícios</div>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════
+         005 · Insights Diários — GLASSMORPHISM CARD
+         ═══════════════════════════════════════════════════ -->
+    <div class="glass-tile glass-tile-insights reveal" data-hover>
+      <!-- Mouse glow -->
+      <div class="glass-glow"></div>
+
+      <!-- Decorative illustration: line chart -->
+      <div class="glass-deco">
+        <svg viewBox="0 0 260 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <!-- Grid lines horizontal -->
+          <line x1="20" y1="170" x2="240" y2="170" stroke="rgba(0,230,255,0.18)" stroke-width="1"/>
+          <line x1="20" y1="138" x2="240" y2="138" stroke="rgba(0,230,255,0.12)" stroke-width="1"/>
+          <line x1="20" y1="106" x2="240" y2="106" stroke="rgba(0,230,255,0.10)" stroke-width="1"/>
+          <line x1="20" y1="74"  x2="240" y2="74"  stroke="rgba(0,230,255,0.08)" stroke-width="1"/>
+          <line x1="20" y1="42"  x2="240" y2="42"  stroke="rgba(0,230,255,0.06)" stroke-width="1"/>
+          <!-- Grid lines vertical -->
+          <line x1="68"  y1="32" x2="68"  y2="175" stroke="rgba(0,230,255,0.07)" stroke-width="1"/>
+          <line x1="116" y1="32" x2="116" y2="175" stroke="rgba(0,230,255,0.07)" stroke-width="1"/>
+          <line x1="164" y1="32" x2="164" y2="175" stroke="rgba(0,230,255,0.07)" stroke-width="1"/>
+          <line x1="212" y1="32" x2="212" y2="175" stroke="rgba(0,230,255,0.07)" stroke-width="1"/>
+          <!-- Area fill below main line -->
+          <path d="M20,158 L68,142 L116,118 L164,90 L212,60 L240,38 L240,172 L20,172 Z"
+                fill="rgba(0,230,255,0.07)"/>
+          <!-- Secondary area (dashed line below) -->
+          <path d="M20,165 L68,152 L116,132 L164,108 L212,82 L240,62 L240,172 L20,172 Z"
+                fill="rgba(0,230,255,0.03)"/>
+          <!-- Secondary dashed line -->
+          <path d="M20,165 L68,152 L116,132 L164,108 L212,82 L240,62"
+                stroke="rgba(0,230,255,0.28)" stroke-width="1.5" stroke-dasharray="6 4"
+                stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+          <!-- Main upward trend line -->
+          <path d="M20,158 L68,142 L116,118 L164,90 L212,60 L240,38"
+                stroke="rgba(0,230,255,0.90)" stroke-width="2.5"
+                stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+          <!-- Data point dots -->
+          <circle cx="20"  cy="158" r="3.5" fill="rgba(0,230,255,0.5)"  stroke="rgba(0,230,255,0.8)" stroke-width="1.5"/>
+          <circle cx="68"  cy="142" r="3.5" fill="rgba(0,230,255,0.55)" stroke="rgba(0,230,255,0.8)" stroke-width="1.5"/>
+          <circle cx="116" cy="118" r="4"   fill="rgba(0,230,255,0.65)" stroke="rgba(0,230,255,0.9)" stroke-width="1.5"/>
+          <circle cx="164" cy="90"  r="4.5" fill="rgba(0,230,255,0.80)" stroke="rgba(0,230,255,1)"   stroke-width="2"/>
+          <circle cx="212" cy="60"  r="5"   fill="rgba(0,230,255,0.90)" stroke="rgba(0,230,255,1)"   stroke-width="2"/>
+          <!-- Highest point glow + tooltip -->
+          <circle cx="240" cy="38"  r="7"   fill="rgba(0,230,255,1)"    stroke="rgba(255,255,255,0.7)" stroke-width="2"/>
+          <circle cx="240" cy="38"  r="18"  fill="rgba(0,230,255,0.10)"/>
+          <!-- Mini tooltip -->
+          <rect x="200" y="14" width="52" height="18" rx="4" fill="rgba(0,230,255,0.2)" stroke="rgba(0,230,255,0.5)" stroke-width="1"/>
+          <text x="226" y="26" text-anchor="middle" font-size="9" fill="rgba(0,230,255,1)" font-family="Space Grotesk, sans-serif" font-weight="600">+38%</text>
+        </svg>
+      </div>
+
+      <!-- Bottom veil -->
+      <div class="glass-veil"></div>
+
+      <!-- Icon -->
+      <div class="glass-icon">
+        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/>
+          <polyline points="17 6 23 6 23 12"/>
+        </svg>
+      </div>
+
+      <!-- Meta -->
+      <div class="glass-meta">
+        <div class="title">Insights Diários</div>
+        <div class="sub">Relatórios automáticos</div>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════
+         006 · Automação — GLASSMORPHISM CARD
+         ═══════════════════════════════════════════════════ -->
+    <div class="glass-tile glass-tile-auto reveal" data-hover>
+      <!-- Mouse glow -->
+      <div class="glass-glow"></div>
+
+      <!-- Decorative illustration: infinity loop -->
+      <div class="glass-deco">
+        <svg viewBox="0 0 260 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <!-- Outer ambient ring -->
+          <ellipse cx="130" cy="100" rx="108" ry="58" stroke="rgba(156,165,255,0.10)" stroke-width="1" stroke-dasharray="10 6"/>
+          <!-- Infinity outer glow path -->
+          <path d="M130,100 C130,73 155,57 180,57 C218,57 242,77 242,100 C242,123 218,143 180,143 C155,143 130,127 130,100 C130,73 105,57 80,57 C42,57 18,77 18,100 C18,123 42,143 80,143 C105,143 130,127 130,100 Z"
+                stroke="rgba(156,165,255,0.18)" stroke-width="12" fill="none"/>
+          <!-- Infinity main stroke -->
+          <path d="M130,100 C130,73 155,57 180,57 C218,57 242,77 242,100 C242,123 218,143 180,143 C155,143 130,127 130,100 C130,73 105,57 80,57 C42,57 18,77 18,100 C18,123 42,143 80,143 C105,143 130,127 130,100 Z"
+                stroke="rgba(156,165,255,0.80)" stroke-width="3" fill="none" stroke-linecap="round"/>
+          <!-- Inner infinity (smaller offset) -->
+          <path d="M130,100 C130,82 148,70 165,70 C190,70 208,84 208,100 C208,116 190,130 165,130 C148,130 130,118 130,100 C130,82 112,70 95,70 C70,70 52,84 52,100 C52,116 70,130 95,130 C112,130 130,118 130,100 Z"
+                stroke="rgba(156,165,255,0.28)" stroke-width="1.5" fill="rgba(156,165,255,0.04)" stroke-dasharray="5 4"/>
+          <!-- Center node -->
+          <circle cx="130" cy="100" r="7"  fill="rgba(156,165,255,1)"  stroke="rgba(255,255,255,0.5)" stroke-width="2"/>
+          <circle cx="130" cy="100" r="16" fill="rgba(156,165,255,0.12)"/>
+          <!-- Moving nodes on the path (4 positions simulated statically) -->
+          <circle cx="180" cy="57"  r="5.5" fill="rgba(156,165,255,0.90)" stroke="rgba(255,255,255,0.4)" stroke-width="1.5"/>
+          <circle cx="242" cy="100" r="4.5" fill="rgba(156,165,255,0.65)" stroke="rgba(156,165,255,0.9)" stroke-width="1.5"/>
+          <circle cx="80"  cy="143" r="5"   fill="rgba(156,165,255,0.75)" stroke="rgba(255,255,255,0.3)" stroke-width="1.5"/>
+          <circle cx="18"  cy="100" r="4"   fill="rgba(156,165,255,0.55)" stroke="rgba(156,165,255,0.8)" stroke-width="1.5"/>
+          <!-- Small connector tick marks -->
+          <line x1="242" y1="91" x2="242" y2="109" stroke="rgba(156,165,255,0.4)" stroke-width="1" stroke-linecap="round"/>
+          <line x1="18"  y1="91" x2="18"  y2="109" stroke="rgba(156,165,255,0.4)" stroke-width="1" stroke-linecap="round"/>
+          <!-- Label: automation text indicator -->
+          <rect x="96" y="150" width="68" height="18" rx="5" fill="rgba(156,165,255,0.12)" stroke="rgba(156,165,255,0.35)" stroke-width="1"/>
+          <text x="130" y="162" text-anchor="middle" font-size="8.5" fill="rgba(156,165,255,0.85)" font-family="Space Grotesk, sans-serif" letter-spacing="1.5">INFINITO</text>
+        </svg>
+      </div>
+
+      <!-- Bottom veil -->
+      <div class="glass-veil"></div>
+
+      <!-- Icon -->
+      <div class="glass-icon">
+        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 12c-2-2.5-4-4-6-4a4 4 0 0 0 0 8c2 0 4-1.5 6-4z"/>
+          <path d="M12 12c2 2.5 4 4 6 4a4 4 0 0 0 0-8c-2 0-4 1.5-6 4z"/>
+        </svg>
+      </div>
+
+      <!-- Meta -->
+      <div class="glass-meta">
+        <div class="title">Fluxos sem fim</div>
+        <div class="sub">Tarefas repetitivas eliminadas</div>
+      </div>
+    </div>
+
+  </div><!-- /.grid -->
+</section>
+
+<!-- Capabilities -->
+<section class="cap container" id="capacidades">
+  <div class="section-label reveal">
+    <span class="num">05 —</span><span>Capacidades</span><span class="line"></span><span>O que entregamos</span>
+  </div>
+  <h2 class="reveal">Da ideia ao <em>deploy</em>. <br>Tudo dentro de casa.</h2>
+  <ul class="cap-list">
+    <li class="cap-row reveal" data-hover>
+      <span class="num">/01</span>
+      <span class="name">Agentes de IA personalizados</span>
+      <span class="desc">Construídos do zero com a identidade, tom de voz e processos da sua empresa. Sem caixa-preta.</span>
+      <span class="arrow">→</span>
+    </li>
+    <li class="cap-row reveal" data-hover>
+      <span class="num">/02</span>
+      <span class="name">Automação de processos</span>
+      <span class="desc">Eliminamos tarefas repetitivas e ganhamos escala sem precisar aumentar o time.</span>
+      <span class="arrow">→</span>
+    </li>
+    <li class="cap-row reveal" data-hover>
+      <span class="num">/03</span>
+      <span class="name">Integrações sob medida</span>
+      <span class="desc">CRMs, ERPs, WhatsApp, e-mail, APIs internas — conectamos qualquer sistema.</span>
+      <span class="arrow">→</span>
+    </li>
+    <li class="cap-row reveal" data-hover>
+      <span class="num">/04</span>
+      <span class="name">Análise &amp; Inteligência</span>
+      <span class="desc">Insights automáticos a partir dos seus dados operacionais e de atendimento.</span>
+      <span class="arrow">→</span>
+    </li>
+    <li class="cap-row reveal" data-hover>
+      <span class="num">/05</span>
+      <span class="name">Suporte e evolução contínua</span>
+      <span class="desc">Seu agente evolui com o negócio. Monitoramento, segurança e ajustes constantes.</span>
+      <span class="arrow">→</span>
+    </li>
+  </ul>
+</section>
+
+<!-- Quote -->
+<section class="quote">
+  <blockquote class="reveal">
+    "Toda grande transformação precisa de um <em>início</em>. Criamos o alicerce tecnológico para a escala do seu negócio."
+  </blockquote>
+  <div class="who reveal">— GenesIA · 2024</div>
+</section>
+
+<!-- CTA / Contato -->
+<section class="cta" id="contato">
+  <div class="section-label reveal">
+    <span class="num">06 —</span><span>Próximo capítulo</span><span class="line"></span><span>Vamos conversar</span>
+  </div>
+  <div class="cta-big reveal">
+    <a href="#contato" data-hover>Vamos <em>criar</em><br>seu agente<span class="ar">↗</span></a>
+  </div>
+  <div class="form-wrap">
+    <div class="reveal">
+      <h3>Receba um <em>diagnóstico gratuito</em>.</h3>
+      <p>Conte um pouco sobre o seu negócio e os desafios atuais. Em até 48 horas, retornamos com um plano inicial — sem compromisso e sem fórmulas prontas.</p>
+    </div>
+    <form class="reveal" action="https://formspree.io/f/mojrqnop" method="POST">
+      <input type="hidden" name="_subject" value="Novo contato via GenesIA">
+      <div class="field">
+        <label>Nome</label>
+        <input type="text" name="nome" required placeholder="Seu nome">
+      </div>
+      <div class="field">
+        <label>Email</label>
+        <input type="email" name="email" required placeholder="seu@email.com">
+      </div>
+      <div class="field">
+        <label>WhatsApp</label>
+        <input type="text" name="whatsapp" placeholder="(11) 99999-9999">
+      </div>
+      <div class="field">
+        <label>Mensagem</label>
+        <textarea name="mensagem" placeholder="Conte um pouco sobre o que vocà precisa..."></textarea>
+      </div>
+      <button type="submit">Solicitar diagnóstico</button>
+    </form>
+  </div>
+  <div class="cta-row">
+    <div class="cta-col">
+      <h4>Fale com a gente</h4>
+      <a href="mailto:denisdiniz@genesia.com.br" data-hover>denisdiniz@genesia.com.br</a>
+      <a href="https://wa.me/5511941516008" target="_blank" rel="noopener" data-hover>+55 11 94151-6008</a>
+    </div>
+    <div class="cta-col">
+      <h4>Estúdio</h4>
+      <p>Brasil<br>Operação remota global</p>
+    </div>
+    <div class="cta-col">
+      <h4>Social</h4>
+      <a href="https://www.linkedin.com/in/genesia-tecnologia-8b1b723b8" target="_blank" rel="noopener" data-hover>LinkedIn</a>
+      <a href="https://www.instagram.com/genesia.ia/" target="_blank" rel="noopener" data-hover>Instagram</a>
+      <a href="https://wa.me/5511941516008" target="_blank" rel="noopener" data-hover>WhatsApp</a>
+    </div>
+    <div class="cta-col">
+      <h4>Empresa</h4>
+      <a href="#sobre" data-hover>Sobre</a>
+      <a href="#processo" data-hover>Processo</a>
+      <a href="#capacidades" data-hover>Capacidades</a>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <span>© 2025 GenesIA · Todos os direitos reservados</span>
+  <div class="links">
+    <a href="#" data-hover>Privacidade</a>
+    <a href="#" data-hover>Termos</a>
+    <a href="#" data-hover>LGPD</a>
+  </div>
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+/* ===========================================================
+   GenesIA · interactions
+   =========================================================== */
+
+/* Loader */
+(function loader(){
+  const bar = document.getElementById('bar');
+  const pct = document.getElementById('pct');
+  const root = document.getElementById('loader');
+  let p = 0;
+  const tick = () => {
+    p += Math.random() * 8 + 2;
+    if (p >= 100) p = 100;
+    bar.style.width = p + '%';
+    pct.textContent = String(Math.floor(p)).padStart(3, '0');
+    if (p < 100) setTimeout(tick, 80 + Math.random()*120);
+    else setTimeout(()=> root.classList.add('done'), 400);
+  };
+  setTimeout(tick, 250);
+})();
+
+/* Custom cursor */
+(function cursor(){
+  const o = document.getElementById('cursor-outer');
+  const i = document.getElementById('cursor-inner');
+  let mx = innerWidth/2, my = innerHeight/2;
+  let ox = mx, oy = my;
+  document.addEventListener('mousemove', e => {
+    mx = e.clientX; my = e.clientY;
+    i.style.transform = `translate(${mx}px, ${my}px) translate(-50%, -50%)`;
+  });
+  function loop(){
+    ox += (mx - ox) * 0.18;
+    oy += (my - oy) * 0.18;
+    o.style.transform = `translate(${ox}px, ${oy}px) translate(-50%, -50%)`;
+    requestAnimationFrame(loop);
+  }
+  loop();
+  document.querySelectorAll('[data-hover], a, button, .filter, .tile, .cap-row, .glass-tile').forEach(el=>{
+    el.addEventListener('mouseenter', ()=>{ o.classList.add('hover'); i.classList.add('hover'); });
+    el.addEventListener('mouseleave', ()=>{ o.classList.remove('hover'); i.classList.remove('hover'); });
+  });
+})();
+
+/* Reveal on scroll */
+(function reveal(){
+  const els = document.querySelectorAll('.reveal');
+  const io = new IntersectionObserver(entries => {
+    entries.forEach(e => { if (e.isIntersecting){ e.target.classList.add('in'); io.unobserve(e.target); } });
+  }, { threshold: 0.12 });
+  els.forEach(el => io.observe(el));
+})();
+
+/* ── Header hide on scroll ─────────────────────────────── */
+(function headerScroll(){
+  const hdr = document.querySelector('header');
+  let lastY = 0;
+  let ticking = false;
+
+  window.addEventListener('scroll', () => {
+    if (ticking) return;
+    ticking = true;
+    requestAnimationFrame(() => {
+      const currentY = window.scrollY;
+      if (currentY > lastY && currentY > 90) {
+        hdr.classList.add('header-hidden');
+      } else {
+        hdr.classList.remove('header-hidden');
+      }
+      lastY = currentY <= 0 ? 0 : currentY;
+      ticking = false;
+    });
+  }, { passive: true });
+})();
+
+/* ── Glassmorphism 3D Tilt + Mouse Glow ────────────────── */
+(function glassTilt(){
+  const EASE_IN  = 'transform 0.08s ease, border-color 0.6s ease, box-shadow 0.6s ease';
+  const EASE_OUT = 'transform 0.65s cubic-bezier(0.23, 1, 0.32, 1), border-color 0.6s ease, box-shadow 0.6s ease';
+
+  document.querySelectorAll('.glass-tile').forEach(card => {
+    card.addEventListener('mouseenter', () => {
+      card.style.transition = EASE_IN;
+    });
+
+    card.addEventListener('mousemove', e => {
+      const rect = card.getBoundingClientRect();
+      const x  = e.clientX - rect.left;
+      const y  = e.clientY - rect.top;
+      const cx = rect.width  / 2;
+      const cy = rect.height / 2;
+
+      /* 3D rotation — max ±10deg */
+      const rotX = ((y - cy) / cy) * -9;
+      const rotY = ((x - cx) / cx) *  9;
+
+      card.style.transform =
+        `perspective(900px) rotateX(${rotX}deg) rotateY(${rotY}deg) scale3d(1.025, 1.025, 1.025)`;
+
+      /* Update CSS custom props for radial glow */
+      card.style.setProperty('--mx', `${(x / rect.width)  * 100}%`);
+      card.style.setProperty('--my', `${(y / rect.height) * 100}%`);
+    });
+
+    card.addEventListener('mouseleave', () => {
+      card.style.transition = EASE_OUT;
+      card.style.transform  = 'perspective(900px) rotateX(0deg) rotateY(0deg) scale3d(1,1,1)';
+      /* Remove inline transform after transition so CSS hover states work cleanly */
+      card.addEventListener('transitionend', function cleanup(ev){
+        if (ev.propertyName === 'transform') {
+          card.style.transform  = '';
+          card.style.transition = '';
+          card.removeEventListener('transitionend', cleanup);
+        }
+      });
+    });
+  });
+})();
+
+/* Hero WebGL — GenesIA logo 3D */
+(function hero3D(){
+  const canvas = document.getElementById('webgl');
+  if (!canvas || typeof THREE === 'undefined') return;
+  const renderer = new THREE.WebGLRenderer({ canvas, antialias:true, alpha:true });
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  renderer.setSize(innerWidth, innerHeight);
+  const scene = new THREE.Scene();
+  const camera = new THREE.PerspectiveCamera(50, innerWidth/innerHeight, 0.1, 100);
+  camera.position.set(0, 0, 7);
+  const logoGroup = new THREE.Group();
+  scene.add(logoGroup);
+  const COL = {
+    cyan:  new THREE.Color('#00e6ff'),
+    blue:  new THREE.Color('#1f6dff'),
+    deep:  new THREE.Color('#0a4dff'),
+    white: new THREE.Color('#ffffff'),
+    lime:  new THREE.Color('#d8ff3e'),
+  };
+  const hexRadius = 0.18;
+  const hexHeight = 0.10;
+  const gridRadius = 5;
+  const spacing = hexRadius * 1.85;
+  const hexShape = new THREE.Shape();
+  for (let i=0; i<6; i++){
+    const a = i * Math.PI/3 + Math.PI/6;
+    if (i===0) hexShape.moveTo(Math.cos(a)*hexRadius, Math.sin(a)*hexRadius);
+    else hexShape.lineTo(Math.cos(a)*hexRadius, Math.sin(a)*hexRadius);
+  }
+  hexShape.closePath();
+  const hexGeo = new THREE.ExtrudeGeometry(hexShape, {
+    depth: hexHeight, bevelEnabled:true, bevelSegments:2, steps:1, bevelSize:0.012, bevelThickness:0.012
+  });
+  const positions = [];
+  for (let q=-gridRadius; q<=gridRadius; q++){
+    for (let r=-gridRadius; r<=gridRadius; r++){
+      const s = -q-r;
+      if (Math.max(Math.abs(q), Math.abs(r), Math.abs(s)) > gridRadius) continue;
+      const x = spacing * (Math.sqrt(3) * q + Math.sqrt(3)/2 * r);
+      const y = spacing * (1.5 * r);
+      const dist = Math.max(Math.abs(q), Math.abs(r), Math.abs(s));
+      positions.push({ x, y, dist, q, r });
+    }
+  }
+  const centerCutout = 1.6;
+  const renderable = positions.filter(p => Math.hypot(p.x, p.y) > centerCutout * spacing * 0.6);
+  const hexMat = new THREE.MeshStandardMaterial({
+    color: 0x1f6dff, metalness: 0.6, roughness: 0.25, emissive: 0x002a55, emissiveIntensity: 0.6
+  });
+  const inst = new THREE.InstancedMesh(hexGeo, hexMat, renderable.length);
+  inst.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
+  const dummy = new THREE.Object3D();
+  const colorAttr = new Float32Array(renderable.length * 3);
+  const phase = new Float32Array(renderable.length);
+  const tmp = new THREE.Color();
+  renderable.forEach((p, i) => {
+    const t = Math.min(1, p.dist / gridRadius);
+    tmp.copy(COL.deep).lerp(COL.cyan, t * 0.95);
+    if (t > 0.85) tmp.lerp(COL.white, 0.25);
+    colorAttr[i*3+0] = tmp.r; colorAttr[i*3+1] = tmp.g; colorAttr[i*3+2] = tmp.b;
+    phase[i] = Math.random() * Math.PI * 2;
+  });
+  inst.instanceColor = new THREE.InstancedBufferAttribute(colorAttr, 3);
+  renderable.forEach((p, i) => {
+    dummy.position.set(p.x, p.y, 0);
+    dummy.rotation.set(0,0,0);
+    dummy.scale.setScalar(0.92);
+    dummy.updateMatrix();
+    inst.setMatrixAt(i, dummy.matrix);
+  });
+  inst.instanceMatrix.needsUpdate = true;
+  logoGroup.add(inst);
+  const codeGroup = new THREE.Group();
+  function makeChevron(direction = 1){
+    const shape = new THREE.Shape();
+    const w = 0.42, h = 0.72, t = 0.13;
+    if (direction === 1){
+      shape.moveTo(0, h*0.5); shape.lineTo(w, 0); shape.lineTo(0, -h*0.5);
+      shape.lineTo(-t*0.4, -h*0.5+t*0.3); shape.lineTo(w-t, 0); shape.lineTo(-t*0.4, h*0.5-t*0.3);
+    } else {
+      shape.moveTo(0, h*0.5); shape.lineTo(-w, 0); shape.lineTo(0, -h*0.5);
+      shape.lineTo(t*0.4, -h*0.5+t*0.3); shape.lineTo(-w+t, 0); shape.lineTo(t*0.4, h*0.5-t*0.3);
+    }
+    shape.closePath();
+    const geo = new THREE.ExtrudeGeometry(shape, { depth:0.18, bevelEnabled:true, bevelSegments:2, bevelSize:0.02, bevelThickness:0.02 });
+    const mat = new THREE.MeshStandardMaterial({ color:0x4dd0ff, metalness:0.7, roughness:0.2, emissive:0x004a88, emissiveIntensity:0.8 });
+    return new THREE.Mesh(geo, mat);
+  }
+  const left = makeChevron(-1); left.position.set(-0.36, 0, 0);
+  const right = makeChevron(1); right.position.set(0.36, 0, 0);
+  codeGroup.add(left, right);
+  const slashGeo = new THREE.BoxGeometry(0.10, 0.95, 0.18);
+  const slashMat = new THREE.MeshStandardMaterial({ color:0x00e6ff, metalness:0.8, roughness:0.18, emissive:0x004a88, emissiveIntensity:1.2 });
+  const slash = new THREE.Mesh(slashGeo, slashMat);
+  slash.rotation.z = -0.45;
+  codeGroup.add(slash);
+  const haloGeo = new THREE.RingGeometry(0.85, 0.95, 64);
+  const haloMat = new THREE.MeshBasicMaterial({ color:0x00e6ff, transparent:true, opacity:0.35, side:THREE.DoubleSide });
+  const halo = new THREE.Mesh(haloGeo, haloMat);
+  codeGroup.add(halo);
+  logoGroup.add(codeGroup);
+  const outlineShape = new THREE.Shape();
+  const R = (gridRadius + 0.7) * spacing;
+  for (let i=0; i<6; i++){
+    const a = i * Math.PI/3 + Math.PI/6;
+    if (i===0) outlineShape.moveTo(Math.cos(a)*R, Math.sin(a)*R);
+    else outlineShape.lineTo(Math.cos(a)*R, Math.sin(a)*R);
+  }
+  outlineShape.closePath();
+  const outlinePts = outlineShape.getPoints();
+  const outlineGeo = new THREE.BufferGeometry().setFromPoints(outlinePts.concat(outlinePts[0]));
+  const outline = new THREE.LineLoop(outlineGeo, new THREE.LineBasicMaterial({ color:0x00e6ff, transparent:true, opacity:0.25 }));
+  outline.position.z = -0.05;
+  logoGroup.add(outline);
+  scene.add(new THREE.AmbientLight(0x223355, 0.6));
+  const dir = new THREE.DirectionalLight(0xffffff, 1.2); dir.position.set(2,3,4); scene.add(dir);
+  const blueL = new THREE.PointLight(0x00e6ff, 1.4, 14); blueL.position.set(-2,1.5,2); scene.add(blueL);
+  const limeL = new THREE.PointLight(0xd8ff3e, 0.6, 10); limeL.position.set(2.4,-2,1.5); scene.add(limeL);
+  const pCount = 900;
+  const pPos = new Float32Array(pCount * 3);
+  for (let i=0; i<pCount; i++){
+    const r2 = 4.5 + Math.random()*7;
+    const t2 = Math.random()*Math.PI*2;
+    const f2 = Math.acos(2*Math.random()-1);
+    pPos[i*3]   = r2*Math.sin(f2)*Math.cos(t2);
+    pPos[i*3+1] = r2*Math.sin(f2)*Math.sin(t2);
+    pPos[i*3+2] = r2*Math.cos(f2)-2;
+  }
+  const pGeo = new THREE.BufferGeometry();
+  pGeo.setAttribute('position', new THREE.BufferAttribute(pPos, 3));
+  const pMat = new THREE.PointsMaterial({ color:0xffffff, size:0.018, transparent:true, opacity:0.55 });
+  const points = new THREE.Points(pGeo, pMat);
+  scene.add(points);
+  const mouse = { x:0, y:0, tx:0, ty:0 };
+  window.addEventListener('mousemove', e => { mouse.tx=(e.clientX/innerWidth-0.5)*2; mouse.ty=-(e.clientY/innerHeight-0.5)*2; });
+  window.addEventListener('resize', () => { camera.aspect=innerWidth/innerHeight; camera.updateProjectionMatrix(); renderer.setSize(innerWidth,innerHeight); });
+  const clock = new THREE.Clock();
+  function tick(){
+    const t = clock.getElapsedTime();
+    mouse.x += (mouse.tx - mouse.x) * 0.06;
+    mouse.y += (mouse.ty - mouse.y) * 0.06;
+    logoGroup.rotation.y = Math.sin(t*0.4)*0.55 + mouse.x*0.6;
+    logoGroup.rotation.x = Math.sin(t*0.3)*0.18 + mouse.y*0.35;
+    logoGroup.position.y = Math.sin(t*0.6)*0.08;
+    for (let i=0; i<renderable.length; i++){
+      const p = renderable[i];
+      const wave = Math.sin(t*1.8 + p.dist*0.9 + phase[i])*0.12;
+      const ripple = Math.sin(t*2.6 - p.x*1.3 + p.y*1.1)*0.06;
+      dummy.position.set(p.x, p.y, wave+ripple);
+      dummy.rotation.set(0,0,Math.sin(t*0.7+phase[i])*0.08);
+      dummy.scale.setScalar(0.92+Math.sin(t*1.5+phase[i])*0.05);
+      dummy.updateMatrix();
+      inst.setMatrixAt(i, dummy.matrix);
+    }
+    inst.instanceMatrix.needsUpdate = true;
+    codeGroup.rotation.z = Math.sin(t*0.7)*0.08;
+    codeGroup.position.z = 0.25 + Math.sin(t*1.2)*0.05;
+    codeGroup.scale.setScalar(1+Math.sin(t*2.0)*0.04);
+    halo.scale.setScalar(1+Math.sin(t*1.6)*0.07);
+    haloMat.opacity = 0.25 + Math.abs(Math.sin(t*1.3))*0.25;
+    points.rotation.y = t*0.04;
+    points.rotation.x = mouse.y*0.2;
+    camera.position.x += (mouse.x*0.7 - camera.position.x)*0.04;
+    camera.position.y += (mouse.y*0.45 - camera.position.y)*0.04;
+    camera.lookAt(0,0,0);
+    renderer.render(scene, camera);
+    requestAnimationFrame(tick);
+  }
+  tick();
+})();
+
+/* Smooth anchors */
+document.querySelectorAll('a[href^="#"]').forEach(a => {
+  a.addEventListener('click', e => {
+    const id = a.getAttribute('href');
+    if (id.length > 1 && document.querySelector(id)){
+      e.preventDefault();
+      document.querySelector(id).scrollIntoView({ behavior:'smooth', block:'start' });
+    }
+  });
+});
+
+/* Filter chips */
+document.querySelectorAll('.filter').forEach(f => {
+  f.addEventListener('click', () => {
+    document.querySelectorAll('.filter').forEach(x => x.classList.remove('active'));
+    f.classList.add('active');
+  });
+});
+</script>
+</body>
+</html>
