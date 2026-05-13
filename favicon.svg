@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <rect width="64" height="64" fill="#000"/>
+  <polygon points="32,6 43,12.4 43,25.6 32,32 21,25.6 21,12.4" fill="none" stroke="#0088ff" stroke-width="1.2" opacity="0.6"/>
+  <polygon points="11,5 18.5,9.3 18.5,18 11,22.3 3.5,18 3.5,9.3"  fill="none" stroke="#0066cc" stroke-width="0.9" opacity="0.45"/>
+  <polygon points="53,5 60.5,9.3 60.5,18 53,22.3 45.5,18 45.5,9.3"  fill="none" stroke="#0066cc" stroke-width="0.9" opacity="0.45"/>
+  <polygon points="11,42 18.5,46.3 18.5,55 11,59.3 3.5,55 3.5,46.3" fill="none" stroke="#0066cc" stroke-width="0.9" opacity="0.45"/>
+  <polygon points="53,42 60.5,46.3 60.5,55 53,59.3 45.5,55 45.5,46.3" fill="none" stroke="#0066cc" stroke-width="0.9" opacity="0.45"/>
+  <radialGradient id="glow" cx="50%" cy="45%" r="50%">
+    <stop offset="0%" stop-color="#0080ff" stop-opacity="0.20"/>
+    <stop offset="100%" stop-color="#000" stop-opacity="0"/>
+  </radialGradient>
+  <rect width="64" height="64" fill="url(#glow)"/>
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#00e6ff"/>
+      <stop offset="100%" stop-color="#0060ff"/>
+    </linearGradient>
+  </defs>
+  <text x="32" y="34" font-family="'Courier New',monospace" font-size="21" font-weight="bold"
+        text-anchor="middle" dominant-baseline="middle" fill="url(#g)">&lt;/&gt;</text>
+  <text x="32" y="56" font-family="Arial,Helvetica,sans-serif" font-size="8.5" font-weight="bold"
+        text-anchor="middle" fill="#00a0d8" letter-spacing="0.6">GenesIA</text>
+</svg>
